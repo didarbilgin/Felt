@@ -1,0 +1,58 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node
+node_modules
+dist
+dist-ssr
+*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.python-version
+.venv/
+venv/
+env/
+
+# FastAPI / Backend
+backend/.env
+backend/.venv/
+backend/__pycache__/
+backend/app/**/__pycache__/
+
+# Root envs
+.env
+.env.*
+
+# Docker / volumes
+postgres_data/
+pgadmin_data/
+redis_data/
+minio_data/
+
+# Alembic cache
+backend/alembic/__pycache__/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Visual Studio
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* FELT Design System - Navy Blue Academic Theme */
+
+@layer base {
+  :root {
+    /* Navy Blue Academic Theme */
+    --background: 210 20% 98%;
+    --foreground: 215 50% 10%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 215 50% 10%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 50% 10%;
+    
+    --primary: 215 70% 15%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 215 30% 94%;
+    --secondary-foreground: 215 50% 15%;
+    
+    --muted: 215 20% 96%;
+    --muted-foreground: 215 20% 45%;
+    
+    --accent: 215 60% 25%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 215 30% 88%;
+    --input: 215 30% 88%;
+    --ring: 215 70% 15%;
+    
+    --radius: 0.5rem;
+    
+    /* Custom tokens */
+    --navy: 215 70% 15%;
+    --navy-light: 215 50% 25%;
+    --navy-dark: 215 80% 10%;
+    --surface: 210 20% 98%;
+    --surface-elevated: 0 0% 100%;
+
+    /* Sidebar */
+    --sidebar-background: 215 70% 15%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 215 70% 15%;
+    --sidebar-accent: 215 60% 20%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 215 50% 25%;
+    --sidebar-ring: 215 70% 40%;
+  }
+
+  .dark {
+    --background: 215 50% 8%;
+    --foreground: 210 20% 98%;
+    
+    --card: 215 50% 12%;
+    --card-foreground: 210 20% 98%;
+    
+    --popover: 215 50% 12%;
+    --popover-foreground: 210 20% 98%;
+    
+    --primary: 215 60% 60%;
+    --primary-foreground: 215 50% 8%;
+    
+    --secondary: 215 40% 18%;
+    --secondary-foreground: 210 20% 98%;
+    
+    --muted: 215 40% 15%;
+    --muted-foreground: 215 20% 60%;
+    
+    --accent: 215 50% 50%;
+    --accent-foreground: 215 50% 8%;
+    
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 215 40% 20%;
+    --input: 215 40% 20%;
+    --ring: 215 60% 60%;
+
+    --sidebar-background: 215 50% 10%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 215 60% 60%;
+    --sidebar-primary-foreground: 215 50% 10%;
+    --sidebar-accent: 215 40% 18%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 215 40% 20%;
+    --sidebar-ring: 215 60% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight;
+  }
+}
+
+@layer components {
+  .container-narrow {
+    @apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .container-wide {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+  
+  .link-underline {
+    @apply relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left;
+  }
+  
+  .nav-link {
+    @apply text-sm font-medium text-foreground/80 hover:text-primary transition-colors duration-200;
+  }
+  
+  .nav-link-active {
+    @apply text-primary font-semibold;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .animate-fade-up {
+    animation: fadeUp 0.5s ease-out forwards;
+  }
+  
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
