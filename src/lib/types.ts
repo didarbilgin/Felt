@@ -8,8 +8,11 @@ export type ArticleStatus = 'draft' | 'published' | 'archived';
 /** Program offering lifecycle */
 export type ProgramStatus = 'draft' | 'active' | 'archived';
 
-/** Event lifecycle */
-export type EventStatus = 'upcoming' | 'active' | 'completed' | 'cancelled' | 'archived';
+/** Event lifecycle stored in DB/admin */
+export type EventStatus = 'active' | 'completed' | 'cancelled' | 'archived';
+
+/** Event lifecycle displayed on public UI */
+export type EventDisplayStatus = 'upcoming' | 'active' | 'completed' | 'cancelled' | 'archived';
 
 /** Blog post lifecycle */
 export type BlogStatus = 'draft' | 'published' | 'archived';
@@ -23,12 +26,11 @@ export interface Article {
   type: ArticleType;
   year: number;
   language: Language;
-  source: string; // Journal / Conference / Publisher
+  source: string;
   tags: string[];
   link?: string;
   doi?: string;
   abstract?: string;
-  /** Full article body (admin / detail use) */
   content: string;
   status: ArticleStatus;
   createdAt: Date;
@@ -38,9 +40,6 @@ export interface Article {
 // Program types
 export type ProgramCategory =
   | 'education-module'
-  | 'teachers'
-  | 'leaders'
-  | 'parents-communities'
   | 'mentorship'
   | 'certificate'
   | 'transformation-package';
@@ -58,7 +57,13 @@ export interface Program {
 }
 
 // Event types
-export type EventType = 'summit' | 'webinar' | 'masterclass' | 'conference' | 'podcast' | 'media';
+export type EventType =
+  | 'summit'
+  | 'webinar'
+  | 'masterclass'
+  | 'conference'
+  | 'podcast'
+  | 'media';
 
 export interface Event {
   id: string;
@@ -112,7 +117,6 @@ export interface NewsletterSubscriber {
 export interface AdminUser {
   email: string;
   isAuthenticated: boolean;
-  /** Access JWT (alias of accessToken for compatibility) */
   token?: string;
   accessToken?: string;
   refreshToken?: string;
@@ -123,8 +127,10 @@ export interface AdminUser {
 export type CreateArticleData = Omit<Article, 'id' | 'createdAt' | 'updatedAt'>;
 export type CreateProgramData = Omit<Program, 'id' | 'createdAt' | 'updatedAt'>;
 export type CreateEventData = Omit<Event, 'id' | 'createdAt' | 'updatedAt'>;
-export type CreateBlogPostData = Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt'>;
-
+export type CreateBlogPostData = Omit<
+  BlogPost,
+  'id' | 'slug' | 'createdAt' | 'updatedAt'
+>;
 // Category labels for display
 export const articleTypeLabels: Record<ArticleType, string> = {
   article: 'Akademik Makale',
@@ -136,10 +142,7 @@ export const articleTypeLabels: Record<ArticleType, string> = {
 
 export const programCategoryLabels: Record<ProgramCategory, string> = {
   'education-module': 'Eğitim Modülleri',
-  'teachers': 'Öğretmenler için',
-  'leaders': 'Yöneticiler için',
-  'parents-communities': 'Veliler ve Topluluklar için',
-  'mentorship': 'Mentorluk Programı',
+  'mentorship': 'Mentorluk',
   'certificate': 'Sertifika Programları',
   'transformation-package': 'Dönüşüm Paketleri',
 };
@@ -154,10 +157,10 @@ export const eventTypeLabels: Record<EventType, string> = {
 };
 
 export const blogCategoryLabels: Record<BlogCategory, string> = {
-  essay: 'Essay',
-  'future-notes': 'Future Notes',
-  'video-podcast-notes': 'Video & Podcast Notes',
-  'weekly-insight': 'FELT Weekly Insight',
+  essay: 'Deneme',
+  'future-notes': 'Gelecek Notları',
+  'video-podcast-notes': 'Video & Podcast Notları',
+  'weekly-insight': 'Haftalık İçgörü',
 };
 
 export const contactTypeLabels: Record<ContactType, string> = {
@@ -179,30 +182,59 @@ export const programStatusLabels: Record<ProgramStatus, string> = {
 };
 
 export const eventStatusLabels: Record<EventStatus, string> = {
-  upcoming: 'Yakında',
   active: 'Aktif',
   completed: 'Tamamlandı',
   cancelled: 'İptal',
   archived: 'Arşiv',
 };
 
-/**
- * Public display status only: if date passed but DB still says upcoming, show as completed.
- * Does not change stored `event.status`.
- */
-export function getEventDisplayStatus(event: Event, now: Date = new Date()): EventStatus {
-  if (event.status === 'upcoming' && event.date.getTime() < now.getTime()) {
-    return 'completed';
-  }
-  return event.status;
-}
-
-export function getEventDisplayStatusLabel(event: Event, now?: Date): string {
-  return eventStatusLabels[getEventDisplayStatus(event, now)];
-}
+export const eventDisplayStatusLabels: Record<EventDisplayStatus, string> = {
+  upcoming: 'Yaklaşan',
+  active: 'Aktif',
+  completed: 'Tamamlandı',
+  cancelled: 'İptal',
+  archived: 'Arşiv',
+};
 
 export const blogStatusLabels: Record<BlogStatus, string> = {
   draft: 'Taslak',
   published: 'Yayında',
   archived: 'Arşiv',
 };
+
+const UPCOMING_WINDOW_DAYS = 30;
+
+/**
+ * Public display status.
+ *
+ * Stored DB/admin status does not contain "upcoming".
+ * "Upcoming" is calculated for active events whose date is within the next 30 days.
+ */
+export function getEventDisplayStatus(event: Event, now: Date = new Date()): EventDisplayStatus {
+  if (event.status === 'archived') return 'archived';
+  if (event.status === 'cancelled') return 'cancelled';
+  if (event.status === 'completed') return 'completed';
+
+  const eventDate = new Date(event.date);
+
+  if (event.status === 'active' && eventDate.getTime() < now.getTime()) {
+    return 'completed';
+  }
+
+  const upcomingLimit = new Date(now);
+  upcomingLimit.setDate(now.getDate() + UPCOMING_WINDOW_DAYS);
+
+  if (
+    event.status === 'active' &&
+    eventDate.getTime() >= now.getTime() &&
+    eventDate.getTime() <= upcomingLimit.getTime()
+  ) {
+    return 'upcoming';
+  }
+
+  return 'active';
+}
+
+export function getEventDisplayStatusLabel(event: Event, now?: Date): string {
+  return eventDisplayStatusLabels[getEventDisplayStatus(event, now)];
+}

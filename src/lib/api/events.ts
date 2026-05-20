@@ -1,4 +1,10 @@
-import { CreateEventData, Event, EventStatus, EventType } from '@/lib/types';
+import {
+  CreateEventData,
+  Event,
+  EventStatus,
+  EventType,
+  getEventDisplayStatus,
+} from '@/lib/types';
 import { apiRequest } from '@/lib/api/client';
 
 const EVENTS_PATH = '/api/admin/events';
@@ -17,9 +23,18 @@ type BackendEvent = {
 };
 
 const normalizeEventStatus = (raw: string | undefined): EventStatus => {
-  const allowed: EventStatus[] = ['upcoming', 'active', 'completed', 'cancelled', 'archived'];
-  if (raw && allowed.includes(raw as EventStatus)) return raw as EventStatus;
-  return 'upcoming';
+  const allowed: EventStatus[] = [
+    'active',
+    'completed',
+    'cancelled',
+    'archived',
+  ];
+
+  if (raw && allowed.includes(raw as EventStatus)) {
+    return raw as EventStatus;
+  }
+
+  return 'active';
 };
 
 const toFrontend = (item: BackendEvent): Event => ({
@@ -45,84 +60,148 @@ type BackendEventPayload = {
   status: EventStatus;
 };
 
-const mapToBackendPayload = (data: Partial<CreateEventData>): Partial<BackendEventPayload> => {
+const mapToBackendPayload = (
+  data: Partial<CreateEventData>,
+): Partial<BackendEventPayload> => {
   const out: Partial<BackendEventPayload> = {};
+
   if (data.title !== undefined) out.title = data.title;
   if (data.type !== undefined) out.type = data.type;
-  if (data.date !== undefined) out.date = data.date instanceof Date ? data.date.toISOString() : String(data.date);
+
+  if (data.date !== undefined) {
+    out.date =
+      data.date instanceof Date
+        ? data.date.toISOString()
+        : String(data.date);
+  }
+
   if (data.location !== undefined) out.location = data.location;
   if (data.description !== undefined) out.description = data.description;
-  if (data.link !== undefined) out.link = data.link?.trim() ? data.link : null;
+
+  if (data.link !== undefined) {
+    out.link = data.link?.trim() ? data.link : null;
+  }
+
   if (data.status !== undefined) out.status = data.status;
+
   return out;
 };
 
-const toBackendCreate = (data: CreateEventData): BackendEventPayload => ({
+const toBackendCreate = (
+  data: CreateEventData,
+): BackendEventPayload => ({
   title: data.title,
   type: data.type,
-  date: data.date instanceof Date ? data.date.toISOString() : String(data.date),
+  date:
+    data.date instanceof Date
+      ? data.date.toISOString()
+      : String(data.date),
   location: data.location,
   description: data.description,
   link: data.link?.trim() ? data.link : null,
   status: data.status,
 });
 
-const byDateDesc = (a: Event, b: Event) => b.date.getTime() - a.date.getTime();
+const byDateDesc = (a: Event, b: Event) =>
+  b.date.getTime() - a.date.getTime();
 
 export const eventsApi = {
   getAll: async (): Promise<Event[]> => {
-    const data = await apiRequest<BackendEvent[]>(EVENTS_PATH, { method: 'GET' });
+    const data = await apiRequest<BackendEvent[]>(
+      EVENTS_PATH,
+      { method: 'GET' },
+    );
+
     return data.map(toFrontend).sort(byDateDesc);
   },
 
   getByType: async (type: EventType): Promise<Event[]> => {
     const all = await eventsApi.getAll();
-    return all.filter((event) => event.type === type).sort(byDateDesc);
+
+    return all
+      .filter((event) => event.type === type)
+      .filter((event) => event.status !== 'archived')
+      .sort(byDateDesc);
   },
 
   getUpcoming: async (): Promise<Event[]> => {
     const all = await eventsApi.getAll();
-    const now = new Date();
-    return all.filter((event) => event.date >= now).sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    return all
+      .filter(
+        (event) =>
+          getEventDisplayStatus(event) === 'upcoming',
+      )
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
   },
 
   getPast: async (): Promise<Event[]> => {
     const all = await eventsApi.getAll();
-    const now = new Date();
-    return all.filter((event) => event.date < now).sort(byDateDesc);
+
+    return all
+      .filter(
+        (event) =>
+          getEventDisplayStatus(event) === 'completed',
+      )
+      .sort(byDateDesc);
   },
 
-  getById: async (id: string): Promise<Event | undefined> => {
-    const data = await apiRequest<BackendEvent>(`${EVENTS_PATH}/${id}`, { method: 'GET' });
+  getById: async (
+    id: string,
+  ): Promise<Event | undefined> => {
+    const data = await apiRequest<BackendEvent>(
+      `${EVENTS_PATH}/${id}`,
+      { method: 'GET' },
+    );
+
     return toFrontend(data);
   },
 
-  create: async (data: CreateEventData): Promise<Event> => {
+  create: async (
+    data: CreateEventData,
+  ): Promise<Event> => {
     const payload = toBackendCreate(data);
-    const created = await apiRequest<BackendEvent>(EVENTS_PATH, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-      headers: {
-        'Content-Type': 'application/json',
+
+    const created = await apiRequest<BackendEvent>(
+      EVENTS_PATH,
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
-    });
+    );
+
     return toFrontend(created);
   },
 
-  update: async (id: string, data: Partial<CreateEventData>): Promise<Event | undefined> => {
+  update: async (
+    id: string,
+    data: Partial<CreateEventData>,
+  ): Promise<Event | undefined> => {
     const payload = mapToBackendPayload(data);
-    const updated = await apiRequest<BackendEvent>(`${EVENTS_PATH}/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(payload),
-      headers: {
-        'Content-Type': 'application/json',
+
+    const updated = await apiRequest<BackendEvent>(
+      `${EVENTS_PATH}/${id}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
-    });
+    );
+
     return toFrontend(updated);
   },
 
   delete: async (id: string): Promise<boolean> => {
-    await apiRequest<{ ok: boolean }>(`${EVENTS_PATH}/${id}`, { method: 'DELETE' });
+    await apiRequest<{ ok: boolean }>(
+      `${EVENTS_PATH}/${id}`,
+      { method: 'DELETE' },
+    );
+
     return true;
   },
 

@@ -7,12 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { programsApi } from '@/lib/api/programs';
 import { Program, ProgramCategory, programCategoryLabels, programStatusLabels } from '@/lib/types';
 
-const programCategories: { value: ProgramCategory | 'all'; label: string }[] = [
+const programCategories = [
   { value: 'all', label: 'Tümü' },
   { value: 'education-module', label: 'Eğitim Modülleri' },
-  { value: 'teachers', label: 'Öğretmenler için' },
-  { value: 'leaders', label: 'Yöneticiler için' },
-  { value: 'parents-communities', label: 'Veliler için' },
   { value: 'mentorship', label: 'Mentorluk' },
   { value: 'certificate', label: 'Sertifika' },
   { value: 'transformation-package', label: 'Dönüşüm Paketleri' },

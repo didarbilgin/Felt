@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Calendar, MapPin, ExternalLink } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -19,9 +19,15 @@ const eventTypes: { value: EventType | 'all' | 'upcoming' | 'past'; label: strin
   { value: 'all', label: 'Tümü' },
   { value: 'summit', label: 'Summit' },
   { value: 'webinar', label: 'Webinar' },
-  { value: 'masterclass', label: 'Masterclass' },
   { value: 'podcast', label: 'Podcast' },
 ];
+
+const formatEventDate = (date: Date) =>
+  date.toLocaleDateString('tr-TR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
 export default function Events() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -35,30 +41,55 @@ export default function Events() {
       setEvents(data);
       setLoading(false);
     };
+
     loadEvents();
   }, []);
 
-  const now = new Date();
-  const filteredEvents = events.filter((event) => {
-    if (activeTab === 'upcoming') return event.date >= now;
-    if (activeTab === 'past') return event.date < now;
-    if (activeTab === 'all') return true;
-    return event.type === activeTab;
-  });
+  const publicEvents = useMemo(
+    () => events.filter((event) => event.status !== 'archived'),
+    [events],
+  );
+
+  const filteredEvents = useMemo(
+    () =>
+      publicEvents.filter((event) => {
+        const displayStatus = getEventDisplayStatus(event);
+
+        if (activeTab === 'all') return true;
+
+        if (activeTab === 'upcoming') {
+          return displayStatus === 'upcoming';
+        }
+
+        if (activeTab === 'past') {
+          return displayStatus === 'completed';
+        }
+
+        return event.type === activeTab;
+      }),
+    [activeTab, publicEvents],
+  );
+
+  const highlightedEvents = useMemo(() => {
+    const now = new Date();
+
+    return publicEvents
+      .filter((event) => event.status === 'active')
+      .filter((event) => event.date.getTime() >= now.getTime())
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [publicEvents]);
 
   return (
     <div>
-      {/* Page Header */}
       <section className="bg-primary text-primary-foreground py-16 md:py-20">
         <div className="container-wide">
           <h1 className="font-heading text-4xl md:text-5xl font-bold">Etkinlikler</h1>
           <p className="mt-4 text-lg text-primary-foreground/80 max-w-2xl">
-            FELT Summit, webinarlar, masterclass'lar ve daha fazlası
+            FELT Summit, webinarlar ve daha fazlası
           </p>
         </div>
       </section>
 
-      {/* Content */}
       <section className="section-padding">
         <div className="container-wide">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -93,40 +124,66 @@ export default function Events() {
         </div>
       </section>
 
-      {/* FELT Summit Highlight */}
-      <section className="py-16 bg-muted">
-        <div className="container-wide">
-          <div className="bg-primary text-primary-foreground rounded-2xl p-8 md:p-12">
-            <div className="flex flex-col md:flex-row items-start justify-between gap-8">
+      {highlightedEvents.length > 0 && (
+        <section className="py-16 bg-muted">
+          <div className="container-wide">
+            <div className="space-y-6">
               <div>
-                <Badge className="bg-primary-foreground/20 text-primary-foreground mb-4">
-                  Yıllık Etkinlik
-                </Badge>
+                <Badge className="mb-3">Aktif Etkinlikler</Badge>
                 <h2 className="font-heading text-3xl md:text-4xl font-bold">
-                  FELT Summit 2025
+                  Yaklaşan ve Planlanan FELT Etkinlikleri
                 </h2>
-                <p className="mt-4 text-primary-foreground/80 max-w-xl">
-                  Eğitimin geleceğini şekillendiren liderler, araştırmacılar ve yenilikçiler
-                  bir araya geliyor. Konuşmacılar, atölyeler ve networking fırsatları.
+                <p className="mt-3 text-muted-foreground max-w-2xl">
+                  FELT kapsamında planlanan aktif etkinlikler en yakın tarihten başlayarak listelenir.
                 </p>
-                <div className="mt-6 flex flex-wrap gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>15-16 Haziran 2025</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    <span>İstanbul, Türkiye</span>
-                  </div>
-                </div>
               </div>
-              <Button size="lg" variant="secondary" className="shrink-0">
-                Kayıt Ol
-              </Button>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {highlightedEvents.map((event) => (
+                  <div
+                    key={event.id}
+                    className="bg-primary text-primary-foreground rounded-2xl p-8"
+                  >
+                    <div className="flex flex-wrap items-center gap-2 mb-4">
+                      <Badge className="bg-primary-foreground/20 text-primary-foreground">
+                        {eventTypeLabels[event.type]}
+                      </Badge>
+                      <Badge className="bg-primary-foreground/20 text-primary-foreground">
+                        {getEventDisplayStatusLabel(event)}
+                      </Badge>
+                    </div>
+
+                    <h3 className="font-heading text-2xl font-bold">{event.title}</h3>
+
+                    <p className="mt-4 text-primary-foreground/80">
+                      {event.description}
+                    </p>
+
+                    <div className="mt-6 flex flex-wrap gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        <span>{formatEventDate(event.date)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        <span>{event.location}</span>
+                      </div>
+                    </div>
+
+                    {event.link && (
+                      <Button asChild size="lg" variant="secondary" className="mt-6">
+                        <a href={event.link} target="_blank" rel="noopener noreferrer">
+                          Detaylar
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }
@@ -142,7 +199,13 @@ function EventCard({ event }: { event: Event }) {
         <div className="flex flex-wrap items-center gap-2 mb-2">
           <Badge variant="secondary">{eventTypeLabels[event.type]}</Badge>
           <Badge
-            variant={displayStatus === 'cancelled' ? 'destructive' : displayStatus === 'completed' ? 'secondary' : 'outline'}
+            variant={
+              displayStatus === 'cancelled'
+                ? 'destructive'
+                : displayStatus === 'completed'
+                  ? 'secondary'
+                  : 'outline'
+            }
           >
             {displayLabel}
           </Badge>
@@ -150,23 +213,20 @@ function EventCard({ event }: { event: Event }) {
         <CardTitle className="text-lg">{event.title}</CardTitle>
         <CardDescription>{event.description}</CardDescription>
       </CardHeader>
+
       <CardContent>
         <div className="space-y-2 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            <span>
-              {event.date.toLocaleDateString('tr-TR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </span>
+            <span>{formatEventDate(event.date)}</span>
           </div>
+
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4" />
             <span>{event.location}</span>
           </div>
         </div>
+
         {event.link && (
           <a
             href={event.link}

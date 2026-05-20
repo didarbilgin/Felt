@@ -6,7 +6,6 @@ from pydantic import BaseModel
 
 
 class EventStatus(str, Enum):
-    upcoming = "upcoming"
     active = "active"
     completed = "completed"
     cancelled = "cancelled"
@@ -20,7 +19,7 @@ class EventCreate(BaseModel):
     location: str
     description: str
     link: str | None = None
-    status: EventStatus = EventStatus.upcoming
+    status: EventStatus = EventStatus.active
 
 
 class EventUpdate(BaseModel):

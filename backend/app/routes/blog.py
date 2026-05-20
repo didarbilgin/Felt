@@ -1,5 +1,5 @@
 from uuid import UUID
-
+from app.utils.slug import slugify
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -24,17 +24,29 @@ def get_blog_post(post_id: UUID, db: Session = Depends(get_db), _=Depends(get_cu
 
 
 @router.post("", response_model=BlogPostOut)
-def create_blog_post(body: BlogPostCreate, db: Session = Depends(get_db), _=Depends(get_current_admin)):
-    exists = db.query(BlogPost).filter(BlogPost.slug == body.slug).first()
-    if exists:
-        raise HTTPException(status_code=409, detail="Slug already exists")
+def create_blog_post(
+    body: BlogPostCreate,
+    db: Session = Depends(get_db),
+    _=Depends(get_current_admin),
+):
+    base_slug = slugify(body.title)
+    slug = base_slug
+    counter = 1
 
-    obj = BlogPost(**body.model_dump(mode="json"))
+    while db.query(BlogPost).filter(BlogPost.slug == slug).first():
+        slug = f"{base_slug}-{counter}"
+        counter += 1
+
+    data = body.model_dump(mode="json")
+    data["slug"] = slug
+
+    obj = BlogPost(**data)
+
     db.add(obj)
     db.commit()
     db.refresh(obj)
-    return obj
 
+    return obj
 
 @router.put("/{post_id}", response_model=BlogPostOut)
 def update_blog_post(post_id: UUID, body: BlogPostUpdate, db: Session = Depends(get_db), _=Depends(get_current_admin)):
@@ -43,10 +55,7 @@ def update_blog_post(post_id: UUID, body: BlogPostUpdate, db: Session = Depends(
         raise HTTPException(status_code=404, detail="Not found")
 
     data = body.model_dump(exclude_unset=True, mode="json")
-    if "slug" in data:
-        exists = db.query(BlogPost).filter(BlogPost.slug == data["slug"], BlogPost.id != post_id).first()
-        if exists:
-            raise HTTPException(status_code=409, detail="Slug already exists")
+    
 
     for key, value in data.items():
         setattr(obj, key, value)

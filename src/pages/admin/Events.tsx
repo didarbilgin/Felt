@@ -29,7 +29,7 @@ const emptyForm = (): EventFormState => ({
   location: '',
   description: '',
   link: '',
-  status: 'upcoming',
+  status: 'active',
 });
 
 export default function AdminEvents() {
@@ -123,11 +123,13 @@ export default function AdminEvents() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(eventTypeLabels).map(([k, v]) => (
-                        <SelectItem key={k} value={k}>
-                          {v}
-                        </SelectItem>
-                      ))}
+                      {Object.entries(eventTypeLabels)
+                        .filter(([k]) => k !== 'masterclass')
+                        .map(([k, v]) => (
+                          <SelectItem key={k} value={k}>
+                            {v}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>

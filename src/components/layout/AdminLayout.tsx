@@ -1,13 +1,14 @@
 import { useEffect } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  GraduationCap, 
-  Calendar, 
-  PenTool, 
+import {
+  LayoutDashboard,
+  FileText,
+  GraduationCap,
+  Calendar,
+  PenTool,
   LogOut,
-  Menu
+  Menu,
+  Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { authApi } from '@/lib/api/auth';
@@ -21,6 +22,7 @@ const sidebarItems = [
   { label: 'Programlar', href: '/admin/programs', icon: GraduationCap },
   { label: 'Etkinlikler', href: '/admin/events', icon: Calendar },
   { label: 'Blog', href: '/admin/blog', icon: PenTool },
+  { label: 'About CMS', href: '/admin/about', icon: Info },
 ];
 
 export function AdminLayout() {

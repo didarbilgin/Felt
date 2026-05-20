@@ -9,10 +9,10 @@ import { BlogPost, BlogCategory, blogCategoryLabels } from '@/lib/types';
 
 const blogCategories: { value: BlogCategory | 'all'; label: string }[] = [
   { value: 'all', label: 'Tümü' },
-  { value: 'essay', label: 'Essay' },
-  { value: 'future-notes', label: 'Future Notes' },
+  { value: 'essay', label: 'Deneme' },
+  { value: 'future-notes', label: 'Gelecek Notları' },
   { value: 'video-podcast-notes', label: 'Video & Podcast' },
-  { value: 'weekly-insight', label: 'Weekly Insight' },
+  { value: 'weekly-insight', label: 'Haftalık İçgörü' },
 ];
 
 export default function Blog() {

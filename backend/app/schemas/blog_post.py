@@ -13,7 +13,6 @@ class BlogStatus(str, Enum):
 
 class BlogPostCreate(BaseModel):
     title: str
-    slug: str
     category: str
     content: str
     excerpt: str
@@ -23,7 +22,6 @@ class BlogPostCreate(BaseModel):
 
 class BlogPostUpdate(BaseModel):
     title: str | None = None
-    slug: str | None = None
     category: str | None = None
     content: str | None = None
     excerpt: str | None = None

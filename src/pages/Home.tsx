@@ -1,12 +1,55 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, GraduationCap, Lightbulb } from 'lucide-react';
+import {
+  ArrowRight,
+  BookOpen,
+  GraduationCap,
+  Lightbulb,
+  Network,
+  Users,
+  FileText,
+  BookMarked,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { articlesApi } from '@/lib/api/articles';
 import { programsApi } from '@/lib/api/programs';
 import { blogApi } from '@/lib/api/blog';
 import { Article, Program, BlogPost, articleTypeLabels, blogCategoryLabels } from '@/lib/types';
+
+const feltHubs = [
+  {
+    name: 'AI & Pedagogy Circle',
+    type: 'Circle',
+    description:
+      'Yapay zekanın pedagojik ve etik sınırlarını okuma grupları ve tartışma serileriyle araştırır.',
+  },
+  {
+    name: 'Human Futures Lab',
+    type: 'Lab',
+    description:
+      'İnsan merkezli gelecek senaryoları, değerler ve öğrenme modelleri üzerine deneysel çalışmalar.',
+  },
+  {
+    name: 'Post-Digital Learning Hub',
+    type: 'Hub',
+    description:
+      'Post-dijital çağda öğrenme, liderlik ve kurum dönüşümüne dair araştırma ve perspektifler.',
+  },
+  {
+    name: 'Futures Reading Group',
+    type: 'Group',
+    description:
+      'Gelecek okuryazarlığı ve eğitim felsefesi üzerine çevrimiçi okuma ve yorum toplulukları.',
+  },
+];
+
+const ecosystemSignals = [
+  'Çevrimiçi okuma grupları',
+  'Üç aylık araştırma notları',
+  'Fellows programları',
+  'Araştırma toplulukları',
+];
 
 export default function Home() {
   const [featuredArticle, setFeaturedArticle] = useState<Article | null>(null);
@@ -30,33 +73,134 @@ export default function Home() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative bg-primary text-primary-foreground py-24 md:py-32">
+      <section className="relative bg-primary text-primary-foreground py-28 md:py-36">
         <div className="container-wide">
-          <div className="max-w-3xl">
-            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold leading-tight animate-fade-up">
-              Futures of Education,
-              <br />
-              Leadership & Technology
-            </h1>
-            <p className="mt-6 text-lg md:text-xl text-primary-foreground/80 animate-fade-up" style={{ animationDelay: '0.1s' }}>
-              Eğitimin, liderliğin ve teknolojinin geleceğini araştıran, 
-              şekillendiren ve paylaşan akademik platform.
+          <div className="max-w-4xl">
+            <p className="text-sm md:text-base font-medium tracking-wide text-primary-foreground/70 uppercase">
+              Futures of Education, Leadership & Technology
             </p>
-            <div className="mt-8 flex flex-wrap gap-4 animate-fade-up" style={{ animationDelay: '0.2s' }}>
+            <h1 className="mt-4 font-heading text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.15] animate-fade-up">
+              The future of education is being negotiated now.
+            </h1>
+            <p
+              className="mt-6 text-lg md:text-xl text-primary-foreground/85 max-w-2xl leading-relaxed animate-fade-up"
+              style={{ animationDelay: '0.1s' }}
+            >
+              Researching AI, ethics, leadership, and human learning in the
+              post-digital age.
+            </p>
+            <p
+              className="mt-4 text-base text-primary-foreground/65 max-w-xl leading-relaxed animate-fade-up"
+              style={{ animationDelay: '0.15s' }}
+            >
+              FELT, yapay zekâ çağının eğitim, etik ve insanlık düzeyindeki
+              dönüşümüne yanıt veren bir düşünce ve araştırma ağıdır.
+            </p>
+            <div
+              className="mt-10 flex flex-wrap gap-4 animate-fade-up"
+              style={{ animationDelay: '0.2s' }}
+            >
               <Button asChild size="lg" variant="secondary">
                 <Link to="/about">
                   FELT'i Keşfet
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+              >
                 <Link to="/research">Araştırmaları İncele</Link>
               </Button>
             </div>
           </div>
         </div>
-        {/* Decorative element */}
         <div className="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-accent/20 to-transparent pointer-events-none" />
+      </section>
+
+      {/* Manifesto / Big Idea */}
+      <section className="py-12 md:py-16 border-b border-border bg-background">
+        <div className="container-wide">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-primary/5 border-l-4 border-primary px-6 py-8 md:px-10 md:py-10 rounded-r-lg">
+              <p className="font-heading text-xl md:text-2xl text-foreground leading-relaxed italic">
+                &ldquo;FELT explores how education systems, leaders, and learners
+                can respond to the ethical, technological, and human
+                challenges of the AI age.&rdquo;
+              </p>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Bir düşünce platformu, araştırma ağı ve gelecek odaklı eğitim
+                enstitüsü.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Hubs, Circles & Labs */}
+      <section className="section-padding bg-muted/30">
+        <div className="container-wide">
+          <div className="max-w-3xl mb-12">
+            <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground">
+              Hub&apos;lar, Circle&apos;lar ve Lab&apos;lar
+            </h2>
+            <p className="mt-4 text-muted-foreground leading-relaxed">
+              FELT yalnızca bir web sitesi değil; büyüyen bir araştırma
+              ekosistemidir. Hub&apos;lar, circle&apos;lar ve lab&apos;lar
+              düşünce topluluklarını, okuma gruplarını ve ortak araştırmayı
+              bir araya getirir.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-5">
+            {feltHubs.map((hub) => (
+              <Card
+                key={hub.name}
+                className="border-border bg-card card-hover"
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-medium uppercase tracking-wider text-primary">
+                      {hub.type}
+                    </span>
+                    <Network className="h-4 w-4 text-muted-foreground shrink-0" />
+                  </div>
+                  <CardTitle className="font-heading text-lg md:text-xl">
+                    {hub.name}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {hub.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="mt-10 pt-8 border-t border-border">
+            <p className="text-sm font-medium text-foreground mb-4">
+              Büyüyen ekosistem
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {ecosystemSignals.map((signal) => (
+                <span
+                  key={signal}
+                  className="text-sm px-3 py-1.5 rounded-full border border-border bg-background text-muted-foreground"
+                >
+                  {signal}
+                </span>
+              ))}
+            </div>
+            <p className="mt-6 text-sm text-muted-foreground max-w-2xl">
+              Contributors, fellows ve collaborators ile genişleyen bir{' '}
+              <span className="text-foreground font-medium">FELT Network</span>
+              — kurumsal üyelikten çok, ortak düşünce ve araştırma çevresi.
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* Highlights Section */}
@@ -67,7 +211,7 @@ export default function Home() {
               Öne Çıkanlar
             </h2>
             <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-              FELT'in en güncel araştırmaları, programları ve projeleri
+              Güncel araştırmalar, programlar ve perspektifler
             </p>
           </div>
 
@@ -214,21 +358,45 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-primary text-primary-foreground">
+      {/* CTA Section — FELT Network */}
+      <section className="py-16 md:py-20 bg-primary text-primary-foreground">
         <div className="container-wide text-center">
-          <h2 className="font-heading text-3xl md:text-4xl font-bold">
-            FELT Topluluğuna Katılın
-          </h2>
-          <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
-            Eğitimin geleceğini birlikte şekillendirmek isteyen eğitimciler, 
-            araştırmacılar ve liderlerle tanışın.
+          <p className="text-sm font-medium tracking-wide text-primary-foreground/70 uppercase">
+            FELT Network
           </p>
-          <div className="mt-8 flex justify-center gap-4">
+          <h2 className="mt-3 font-heading text-3xl md:text-4xl font-bold">
+            Join the FELT Community
+          </h2>
+          <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto leading-relaxed">
+            Contributors, fellows, collaborators ve research circle
+            üyeleriyle eğitimin geleceğini birlikte düşünün ve araştırın.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3 text-sm text-primary-foreground/70">
+            <span className="inline-flex items-center gap-1.5">
+              <Users className="h-4 w-4" />
+              Collaborators
+            </span>
+            <span className="text-primary-foreground/40">·</span>
+            <span className="inline-flex items-center gap-1.5">
+              <BookMarked className="h-4 w-4" />
+              Research Circle
+            </span>
+            <span className="text-primary-foreground/40">·</span>
+            <span className="inline-flex items-center gap-1.5">
+              <FileText className="h-4 w-4" />
+              Fellows
+            </span>
+          </div>
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Button asChild size="lg" variant="secondary">
-              <Link to="/community">Topluluğu Keşfet</Link>
+              <Link to="/community">FELT Topluluğuna Katıl</Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+            >
               <Link to="/contact">İletişime Geç</Link>
             </Button>
           </div>

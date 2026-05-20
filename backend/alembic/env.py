@@ -14,7 +14,7 @@ from app.models.contact_message import ContactMessage
 from app.models.event import Event
 from app.models.newsletter_subscription import NewsletterSubscription
 from app.models.program import Program
-
+from app.models.about_section import AboutSection
 config = context.config
 
 if config.config_file_name is not None:

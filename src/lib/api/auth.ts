@@ -18,6 +18,7 @@ interface MeResponse {
   role: string;
 }
 
+
 export const authApi = {
   login: async (email: string, password: string): Promise<AdminUser> => {
     const data = await apiRequest<LoginResponse>('/api/auth/login', {
