@@ -7,10 +7,21 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { PageHero } from '@/components/cms/PageHero';
+import { usePageContent } from '@/hooks/usePageContent';
+import { getSection } from '@/lib/cms/pages';
 import { contactApi } from '@/lib/api/contact';
 import { ContactType, contactTypeLabels } from '@/lib/types';
 
 export default function Contact() {
+  const { heroTitle, heroSubtitle, sections } = usePageContent('contact', {
+    title: 'İletişim',
+    subtitle: 'Önerileriniz, görüşleriniz ve mesajlarınız için bize yazın',
+  });
+  const contactInfo = getSection(sections, 'contact-info');
+  const emailItem = contactInfo?.items?.find((i) => i.title === 'E-posta');
+  const locationItem = contactInfo?.items?.find((i) => i.title === 'Konum');
+
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [newsletterLoading, setNewsletterLoading] = useState(false);
@@ -43,7 +54,7 @@ export default function Contact() {
       });
       toast({
         title: 'Başarılı',
-        description: 'Mesajınız başarıyla gönderildi. En kısa sürede size dönüş yapacağız.',
+        description: 'Mesajınız alındı. Teşekkür ederiz.',
       });
       setFormData({ name: '', email: '', type: '', message: '' });
     } catch (error) {
@@ -82,15 +93,7 @@ export default function Contact() {
 
   return (
     <div>
-      {/* Page Header */}
-      <section className="bg-primary text-primary-foreground py-16 md:py-20">
-        <div className="container-wide">
-          <h1 className="font-heading text-4xl md:text-5xl font-bold">İletişim</h1>
-          <p className="mt-4 text-lg text-primary-foreground/80 max-w-2xl">
-            Sorularınız, iş birliği teklifleriniz veya geri bildirimleriniz için bize ulaşın
-          </p>
-        </div>
-      </section>
+      <PageHero title={heroTitle} subtitle={heroSubtitle} />
 
       {/* Content */}
       <section className="section-padding">
@@ -100,9 +103,9 @@ export default function Contact() {
             <div className="lg:col-span-2">
               <Card className="border-border">
                 <CardHeader>
-                  <CardTitle>Bize Yazın</CardTitle>
+                  <CardTitle>Mesajınızı Paylaşın</CardTitle>
                   <CardDescription>
-                    Formu doldurun, en kısa sürede size dönüş yapacağız.
+                    Düşüncelerinizi, önerilerinizi veya sorularınızı bizimle paylaşabilirsiniz.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -177,8 +180,11 @@ export default function Contact() {
                     <Mail className="h-5 w-5 text-primary mt-0.5" />
                     <div>
                       <p className="font-medium text-foreground">E-posta</p>
-                      <a href="mailto:info@felt.org" className="text-sm text-muted-foreground hover:text-primary">
-                        info@felt.org
+                      <a
+                        href={`mailto:${emailItem?.content || 'info@felt.org'}`}
+                        className="text-sm text-muted-foreground hover:text-primary"
+                      >
+                        {emailItem?.content || 'info@felt.org'}
                       </a>
                     </div>
                   </div>
@@ -187,7 +193,7 @@ export default function Contact() {
                     <div>
                       <p className="font-medium text-foreground">Adres</p>
                       <p className="text-sm text-muted-foreground">
-                        İstanbul, Türkiye
+                        {locationItem?.content || 'İstanbul, Türkiye'}
                       </p>
                     </div>
                   </div>
@@ -195,11 +201,14 @@ export default function Contact() {
               </Card>
 
               {/* Newsletter */}
-              <Card className="border-border bg-primary/5">
-                <CardHeader>
-                  <CardTitle className="text-lg">Bülten</CardTitle>
-                  <CardDescription>
-                    Haftalık içgörüler ve güncellemeler için abone olun.
+              <Card className="border-border bg-card shadow-sm">
+                <CardHeader className="pb-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">
+                    Bülten
+                  </p>
+                  <CardTitle className="text-lg">Haftalık içgörüler</CardTitle>
+                  <CardDescription className="leading-relaxed">
+                    Araştırma notları ve yeni yayınlardan haberdar olun.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -209,8 +218,14 @@ export default function Contact() {
                       value={newsletterEmail}
                       onChange={(e) => setNewsletterEmail(e.target.value)}
                       placeholder="E-posta adresiniz"
+                      className="bg-background"
                     />
-                    <Button type="submit" className="w-full" disabled={newsletterLoading}>
+                    <Button
+                      type="submit"
+                      variant="default"
+                      className="w-full"
+                      disabled={newsletterLoading}
+                    >
                       {newsletterLoading ? 'Kaydediliyor...' : 'Abone Ol'}
                     </Button>
                   </form>

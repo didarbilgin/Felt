@@ -8,7 +8,8 @@ import {
   PenTool,
   LogOut,
   Menu,
-  Info
+  Layout,
+  Mail,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { authApi } from '@/lib/api/auth';
@@ -22,7 +23,8 @@ const sidebarItems = [
   { label: 'Programlar', href: '/admin/programs', icon: GraduationCap },
   { label: 'Etkinlikler', href: '/admin/events', icon: Calendar },
   { label: 'Blog', href: '/admin/blog', icon: PenTool },
-  { label: 'About CMS', href: '/admin/about', icon: Info },
+  { label: 'Sayfaları Düzenle', href: '/admin/pages', icon: Layout },
+  { label: 'İletişim Mesajları', href: '/admin/contact-messages', icon: Mail },
 ];
 
 export function AdminLayout() {

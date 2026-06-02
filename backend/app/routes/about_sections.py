@@ -15,9 +15,42 @@ from app.schemas.about_section import (
 public_router = APIRouter(prefix="/api/about-sections", tags=["about-sections"])
 admin_router = APIRouter(prefix="/api/admin/about-sections", tags=["admin:about-sections"])
 
+FOUNDER_CV_BOOTSTRAP = {
+    "section_key": "founder-cv",
+    "title": "Kurucunun Özgeçmişi",
+    "content": """Dr. Hümeyra Kalafat, eğitim liderliği, gelecek okuryazarlığı ve teknoloji destekli öğrenme alanlarında çalışan bir eğitimci ve eğitim stratejistidir.
+
+Yüksek lisans ve doktora çalışmalarını eğitim bilimleri ve liderlik alanlarında tamamlamış; okul, üniversite ve uluslararası projelerde eğitim dönüşümü, yapay zekâ ve insan merkezli öğrenme modelleri üzerine araştırma ve uygulama programları yürütmüştür.
+
+FELT'i, eğitimin geleceğine dair düşünce, araştırma ve uygulamayı bir araya getiren büyüyen bir ekosistem olarak kurmuştur.""",
+    "items": None,
+    "sort_order": 2,
+    "is_active": True,
+}
+
+
+def _ensure_founder_cv_section(db: Session) -> None:
+    existing = (
+        db.query(AboutSection)
+        .filter(AboutSection.section_key == "founder-cv")
+        .first()
+    )
+    if existing:
+        if not existing.is_active:
+            existing.is_active = True
+            existing.title = FOUNDER_CV_BOOTSTRAP["title"]
+            if not existing.content:
+                existing.content = FOUNDER_CV_BOOTSTRAP["content"]
+            db.commit()
+        return
+
+    db.add(AboutSection(**FOUNDER_CV_BOOTSTRAP))
+    db.commit()
+
 
 @public_router.get("", response_model=list[AboutSectionOut])
 def list_public_about_sections(db: Session = Depends(get_db)):
+    _ensure_founder_cv_section(db)
     return (
         db.query(AboutSection)
         .filter(AboutSection.is_active.is_(True))

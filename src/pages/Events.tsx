@@ -3,7 +3,10 @@ import { Calendar, MapPin, ExternalLink } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHero } from '@/components/cms/PageHero';
+import { usePageContent } from '@/hooks/usePageContent';
+import { buildCategoryTabOptions } from '@/lib/cms/categoryTabs';
+import { getSection } from '@/lib/cms/pages';
 import { eventsApi } from '@/lib/api/events';
 import {
   Event,
@@ -13,11 +16,11 @@ import {
   getEventDisplayStatusLabel,
 } from '@/lib/types';
 
-const eventTypes: { value: EventType | 'all' | 'upcoming' | 'past'; label: string }[] = [
+const defaultEventTypes: { value: EventType | 'all' | 'upcoming' | 'past'; label: string }[] = [
   { value: 'upcoming', label: 'Yaklaşan' },
   { value: 'past', label: 'Geçmiş' },
   { value: 'all', label: 'Tümü' },
-  { value: 'summit', label: 'Summit' },
+  { value: 'summit', label: 'Zirve' },
   { value: 'webinar', label: 'Webinar' },
   { value: 'podcast', label: 'Podcast' },
 ];
@@ -30,6 +33,14 @@ const formatEventDate = (date: Date) =>
   });
 
 export default function Events() {
+  const { heroTitle, heroSubtitle, sections } = usePageContent('events', {
+    title: 'Etkinlikler',
+    subtitle: 'Zirve, webinar, masterclass ve topluluk buluşmaları',
+  });
+  const highlight = getSection(sections, 'highlight');
+  const cmsEventTypes = buildCategoryTabOptions(sections, 'event-tabs');
+  const eventTypes = cmsEventTypes.length > 0 ? cmsEventTypes : defaultEventTypes;
+
   const [events, setEvents] = useState<Event[]>([]);
   const [activeTab, setActiveTab] = useState<string>('upcoming');
   const [loading, setLoading] = useState(true);
@@ -79,111 +90,147 @@ export default function Events() {
       .sort((a, b) => a.date.getTime() - b.date.getTime());
   }, [publicEvents]);
 
+  const showHighlight = highlightedEvents.length > 0;
+  const displayHighlightedEvents = highlightedEvents.slice(0, 3);
+
+  const scrollToAllEvents = () => {
+    document.getElementById('etkinlik-listesi')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
-    <div>
-      <section className="bg-primary text-primary-foreground py-16 md:py-20">
-        <div className="container-wide">
-          <h1 className="font-heading text-4xl md:text-5xl font-bold">Etkinlikler</h1>
-          <p className="mt-4 text-lg text-primary-foreground/80 max-w-2xl">
-            FELT Summit, webinarlar ve daha fazlası
-          </p>
-        </div>
-      </section>
+    <div className="bg-background">
+      <PageHero title={heroTitle} subtitle={heroSubtitle} />
 
-      <section className="section-padding">
-        <div className="container-wide">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1 mb-8">
-              {eventTypes.map((type) => (
-                <TabsTrigger
-                  key={type.value}
-                  value={type.value}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+      <div className="relative">
+        {showHighlight && (
+          <section
+            id="aktif-etkinlikler"
+            className="relative scroll-mt-20 pt-10 md:pt-14 pb-6 md:pb-8"
+          >
+            <div
+              className="absolute inset-0 bg-gradient-to-b from-muted/60 via-muted/30 to-background pointer-events-none"
+              aria-hidden
+            />
+            <div className="container-wide relative">
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 md:mb-12">
+                <div className="max-w-3xl">
+                  <Badge className="mb-3">{highlight?.title || 'Aktif Etkinlikler'}</Badge>
+                  <h2 className="font-heading text-3xl md:text-4xl lg:text-[2.5rem] font-bold text-foreground leading-tight">
+                    {highlight?.subtitle || 'Yaklaşan etkinliklerimizi keşfedin'}
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={scrollToAllEvents}
+                  className="text-sm font-medium text-primary hover:underline shrink-0 self-start sm:self-auto"
                 >
-                  {type.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            <TabsContent value={activeTab}>
-              {loading ? (
-                <div className="text-center py-12 text-muted-foreground">Yükleniyor...</div>
-              ) : filteredEvents.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  Bu kategoride etkinlik bulunamadı.
-                </div>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-6">
-                  {filteredEvents.map((event) => (
-                    <EventCard key={event.id} event={event} />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        </div>
-      </section>
-
-      {highlightedEvents.length > 0 && (
-        <section className="py-16 bg-muted">
-          <div className="container-wide">
-            <div className="space-y-6">
-              <div>
-                <Badge className="mb-3">Aktif Etkinlikler</Badge>
-                <h2 className="font-heading text-3xl md:text-4xl font-bold">
-                  Yaklaşan ve Planlanan FELT Etkinlikleri
-                </h2>
-                <p className="mt-3 text-muted-foreground max-w-2xl">
-                  FELT kapsamında planlanan aktif etkinlikler en yakın tarihten başlayarak listelenir.
-                </p>
+                  Tüm etkinlikleri gör ↓
+                </button>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
-                {highlightedEvents.map((event) => (
-                  <div
+              <div className="space-y-6 md:space-y-8">
+                {displayHighlightedEvents.map((event) => (
+                  <article
                     key={event.id}
-                    className="bg-primary text-primary-foreground rounded-2xl p-8"
+                    className="flex flex-col lg:flex-row lg:items-stretch rounded-2xl overflow-hidden border border-border bg-card shadow-md min-h-[220px] lg:min-h-[260px]"
                   >
-                    <div className="flex flex-wrap items-center gap-2 mb-4">
-                      <Badge className="bg-primary-foreground/20 text-primary-foreground">
-                        {eventTypeLabels[event.type]}
-                      </Badge>
-                      <Badge className="bg-primary-foreground/20 text-primary-foreground">
-                        {getEventDisplayStatusLabel(event)}
-                      </Badge>
-                    </div>
-
-                    <h3 className="font-heading text-2xl font-bold">{event.title}</h3>
-
-                    <p className="mt-4 text-primary-foreground/80">
-                      {event.description}
-                    </p>
-
-                    <div className="mt-6 flex flex-wrap gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>{formatEventDate(event.date)}</span>
+                    <div className="lg:w-[36%] xl:w-[32%] bg-primary text-primary-foreground px-8 py-8 md:px-10 md:py-10 flex flex-col justify-center shrink-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-5">
+                        <Badge className="bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/25">
+                          {eventTypeLabels[event.type]}
+                        </Badge>
+                        <Badge className="bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/25">
+                          {getEventDisplayStatusLabel(event)}
+                        </Badge>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        <span>{event.location}</span>
+                      <div className="space-y-3 text-sm md:text-base">
+                        <div className="flex items-center gap-2.5">
+                          <Calendar className="h-5 w-5 shrink-0 opacity-90" />
+                          <span>{formatEventDate(event.date)}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <MapPin className="h-5 w-5 shrink-0 opacity-90" />
+                          <span>{event.location}</span>
+                        </div>
                       </div>
                     </div>
 
-                    {event.link && (
-                      <Button asChild size="lg" variant="secondary" className="mt-6">
-                        <a href={event.link} target="_blank" rel="noopener noreferrer">
-                          Detaylar
-                        </a>
-                      </Button>
-                    )}
-                  </div>
+                    <div className="flex-1 px-8 py-8 md:px-10 md:py-10 flex flex-col justify-center">
+                      <h3 className="font-heading text-2xl md:text-3xl font-bold text-foreground leading-snug">
+                        {event.title}
+                      </h3>
+                      <p className="mt-4 text-base md:text-lg text-muted-foreground leading-relaxed">
+                        {event.description}
+                      </p>
+                      {event.link && (
+                        <Button asChild size="lg" className="mt-6 w-fit">
+                          <a href={event.link} target="_blank" rel="noopener noreferrer">
+                            Detaylar
+                            <ExternalLink className="ml-2 h-4 w-4" />
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  </article>
                 ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section
+          id="etkinlik-listesi"
+          className={`scroll-mt-20 ${showHighlight ? 'pb-16 md:pb-24' : 'section-padding'}`}
+        >
+          <div className="container-wide">
+            <div
+              className={
+                showHighlight
+                  ? 'rounded-2xl border border-border bg-card shadow-sm overflow-hidden'
+                  : ''
+              }
+            >
+              <div className={showHighlight ? 'px-6 md:px-10 pt-8 md:pt-10 pb-6 border-b border-border/80 bg-muted/20' : 'mb-8'}>
+                <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground">
+                  Tüm Etkinlikler
+                </h2>
+              </div>
+
+              <div className={showHighlight ? 'px-6 md:px-10 py-8 md:py-10' : ''}>
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="flex flex-wrap h-auto gap-1.5 bg-muted/80 p-1.5 mb-8 md:mb-10 w-full justify-start">
+                    {eventTypes.map((type) => (
+                      <TabsTrigger
+                        key={type.value}
+                        value={type.value}
+                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 py-2"
+                      >
+                        {type.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+
+                  <TabsContent value={activeTab} className="mt-0">
+                    {loading ? (
+                      <div className="text-center py-12 text-muted-foreground">Yükleniyor...</div>
+                    ) : filteredEvents.length === 0 ? (
+                      <div className="text-center py-12 text-muted-foreground">
+                        Bu kategoride etkinlik bulunamadı.
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-5 md:gap-6">
+                        {filteredEvents.map((event) => (
+                          <EventCard key={event.id} event={event} />
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </div>
             </div>
           </div>
         </section>
-      )}
+      </div>
     </div>
   );
 }
@@ -194,9 +241,13 @@ function EventCard({ event }: { event: Event }) {
   const isDimmed = displayStatus === 'completed' || displayStatus === 'cancelled';
 
   return (
-    <Card className={`border-border ${isDimmed ? 'opacity-80 border-muted-foreground/25' : ''}`}>
-      <CardHeader>
-        <div className="flex flex-wrap items-center gap-2 mb-2">
+    <article
+      className={`flex flex-col md:flex-row md:items-start gap-5 md:gap-8 rounded-xl border border-border bg-background p-6 md:p-8 transition-shadow hover:shadow-md ${
+        isDimmed ? 'opacity-85 border-muted-foreground/20' : ''
+      }`}
+    >
+      <div className="md:w-44 lg:w-52 shrink-0 space-y-3">
+        <div className="flex flex-wrap gap-2">
           <Badge variant="secondary">{eventTypeLabels[event.type]}</Badge>
           <Badge
             variant={
@@ -210,35 +261,35 @@ function EventCard({ event }: { event: Event }) {
             {displayLabel}
           </Badge>
         </div>
-        <CardTitle className="text-lg">{event.title}</CardTitle>
-        <CardDescription>{event.description}</CardDescription>
-      </CardHeader>
-
-      <CardContent>
         <div className="space-y-2 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
+            <Calendar className="h-4 w-4 shrink-0 text-primary/70" />
             <span>{formatEventDate(event.date)}</span>
           </div>
-
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4" />
+            <MapPin className="h-4 w-4 shrink-0 text-primary/70" />
             <span>{event.location}</span>
           </div>
         </div>
+      </div>
 
+      <div className="flex-1 min-w-0">
+        <h3 className="font-heading text-xl md:text-2xl font-semibold text-foreground leading-snug">
+          {event.title}
+        </h3>
+        <p className="mt-3 text-base text-muted-foreground leading-relaxed">{event.description}</p>
         {event.link && (
           <a
             href={event.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-1 text-sm text-primary hover:underline"
+            className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
           >
             <ExternalLink className="h-4 w-4" />
             Detaylar
           </a>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </article>
   );
 }

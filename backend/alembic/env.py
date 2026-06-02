@@ -15,6 +15,7 @@ from app.models.event import Event
 from app.models.newsletter_subscription import NewsletterSubscription
 from app.models.program import Program
 from app.models.about_section import AboutSection
+from app.models.page import Page, PageSection
 config = context.config
 
 if config.config_file_name is not None:

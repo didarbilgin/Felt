@@ -23,6 +23,9 @@ class ArticleCreate(BaseModel):
     tags: list[str] = Field(default_factory=list)
     link: str | None = None
     doi: str | None = None
+    authors: str | None = None
+    cover_image: str | None = None
+    pdf_link: str | None = None
     status: ArticleStatus = ArticleStatus.draft
 
 
@@ -38,6 +41,9 @@ class ArticleUpdate(BaseModel):
     tags: list[str] | None = None
     link: str | None = None
     doi: str | None = None
+    authors: str | None = None
+    cover_image: str | None = None
+    pdf_link: str | None = None
     status: ArticleStatus | None = None
 
 
@@ -54,6 +60,9 @@ class ArticleOut(BaseModel):
     tags: list[str]
     link: str | None
     doi: str | None
+    authors: str | None
+    cover_image: str | None
+    pdf_link: str | None
     status: ArticleStatus
     published_at: datetime | None
     created_at: datetime

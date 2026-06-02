@@ -1,5 +1,8 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Linkedin, Twitter, Youtube } from 'lucide-react';
+import { pagesApi } from '@/lib/cms/pages';
+import { getSection } from '@/lib/cms/pages';
 
 const footerLinks = {
   platform: [
@@ -24,6 +27,17 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const [brandText, setBrandText] = useState(
+    'Futures of Education, Leadership & Technology — Eğitimin, liderliğin ve teknolojinin geleceğini şekillendiren araştırma ve eğitim platformu.'
+  );
+
+  useEffect(() => {
+    pagesApi.getPage('footer').then((page) => {
+      const brand = getSection(page?.sections, 'brand');
+      if (brand?.content) setBrandText(brand.content);
+    });
+  }, []);
+
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="container-wide py-12 md:py-16">
@@ -33,10 +47,7 @@ export function Footer() {
             <Link to="/" className="inline-block">
               <span className="font-heading text-3xl font-bold">FELT</span>
             </Link>
-            <p className="mt-3 text-sm text-primary-foreground/80 max-w-md">
-              Futures of Education, Leadership & Technology — Eğitimin, liderliğin ve teknolojinin 
-              geleceğini şekillendiren araştırma ve eğitim platformu.
-            </p>
+            <p className="mt-3 text-sm text-primary-foreground/80 max-w-md">{brandText}</p>
             {/* Social Links */}
             <div className="flex gap-4 mt-6">
               {socialLinks.map((social) => (

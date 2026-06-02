@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react';
-import { ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, ExternalLink } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { PageHero } from '@/components/cms/PageHero';
+import { usePageContent } from '@/hooks/usePageContent';
+import { buildCategoryTabOptions } from '@/lib/cms/categoryTabs';
+import { getSection } from '@/lib/cms/pages';
 import { articlesApi } from '@/lib/api/articles';
 import { Article, ArticleType, Language, articleTypeLabels } from '@/lib/types';
 
-const articleTypes: { value: ArticleType | 'all'; label: string }[] = [
+const defaultArticleTypes: { value: ArticleType | 'all'; label: string }[] = [
   { value: 'all', label: 'Tümü' },
   { value: 'article', label: 'Akademik Makaleler' },
   { value: 'conference', label: 'Kongre & Sunumlar' },
@@ -15,9 +20,33 @@ const articleTypes: { value: ArticleType | 'all'; label: string }[] = [
   { value: 'scale', label: 'Veri ve Ölçekler' },
 ];
 
+const defaultUiLabels: Record<string, string> = {
+  language_filter: 'Dil:',
+  language_all: 'Tümü',
+  language_tr: 'Türkçe',
+  language_en: 'İngilizce',
+  empty: 'Bu kategoride yayın bulunamadı.',
+  loading: 'Yükleniyor...',
+};
+
 export default function Research() {
+  const { heroTitle, heroSubtitle, sections } = usePageContent('research', {
+    title: 'Araştırma & Yayınlar',
+    subtitle: 'Eğitim, liderlik ve teknoloji alanlarındaki akademik çalışmalarımız',
+  });
+
+  const uiLabels = defaultUiLabels;
+  const cmsArticleTypes = buildCategoryTabOptions(sections, 'article-tabs');
+  const articleTypes =
+    cmsArticleTypes.length > 0 ? cmsArticleTypes : defaultArticleTypes;
+
+  const categoryLabel = (slug: string) =>
+    articleTypes.find((t) => t.value === slug)?.label ||
+    articleTypeLabels[slug as ArticleType] ||
+    slug;
+
   const [articles, setArticles] = useState<Article[]>([]);
-  const [activeTab, setActiveTab] = useState<ArticleType | 'all'>('all');
+  const [activeTab, setActiveTab] = useState<string>('all');
   const [languageFilter, setLanguageFilter] = useState<Language | 'all'>('all');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -47,22 +76,12 @@ export default function Research() {
 
   return (
     <div>
-      {/* Page Header */}
-      <section className="bg-primary text-primary-foreground py-16 md:py-20">
-        <div className="container-wide">
-          <h1 className="font-heading text-4xl md:text-5xl font-bold">Araştırma & Yayınlar</h1>
-          <p className="mt-4 text-lg text-primary-foreground/80 max-w-2xl">
-            Eğitim, liderlik ve teknoloji alanlarındaki akademik çalışmalarımız
-          </p>
-        </div>
-      </section>
+      <PageHero title={heroTitle} subtitle={heroSubtitle} />
 
-      {/* Content */}
       <section className="section-padding">
         <div className="container-wide">
-          {/* Language Filter */}
           <div className="flex items-center gap-2 mb-6">
-            <span className="text-sm text-muted-foreground">Dil:</span>
+            <span className="text-sm text-muted-foreground">{uiLabels.language_filter}</span>
             <div className="flex gap-1">
               {(['all', 'TR', 'EN'] as const).map((lang) => (
                 <Button
@@ -71,14 +90,17 @@ export default function Research() {
                   size="sm"
                   onClick={() => setLanguageFilter(lang)}
                 >
-                  {lang === 'all' ? 'Tümü' : lang === 'TR' ? 'Türkçe' : 'English'}
+                  {lang === 'all'
+                    ? uiLabels.language_all
+                    : lang === 'TR'
+                      ? uiLabels.language_tr
+                      : uiLabels.language_en}
                 </Button>
               ))}
             </div>
           </div>
 
-          {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ArticleType | 'all')}>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1">
               {articleTypes.map((type) => (
                 <TabsTrigger
@@ -95,15 +117,13 @@ export default function Research() {
               {loadError ? (
                 <div className="text-center py-12 text-destructive">{loadError}</div>
               ) : loading ? (
-                <div className="text-center py-12 text-muted-foreground">Yükleniyor...</div>
+                <div className="text-center py-12 text-muted-foreground">{uiLabels.loading}</div>
               ) : filteredArticles.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  Bu kategoride yayın bulunamadı.
-                </div>
+                <div className="text-center py-12 text-muted-foreground">{uiLabels.empty}</div>
               ) : (
                 <div className="space-y-4">
                   {filteredArticles.map((article) => (
-                    <ArticleCard key={article.id} article={article} />
+                    <ArticleCard key={article.id} article={article} categoryLabel={categoryLabel} />
                   ))}
                 </div>
               )}
@@ -115,7 +135,13 @@ export default function Research() {
   );
 }
 
-function ArticleCard({ article }: { article: Article }) {
+function ArticleCard({
+  article,
+  categoryLabel,
+}: {
+  article: Article;
+  categoryLabel: (slug: string) => string;
+}) {
   const linkHref = article.link?.trim();
   const doiValue = article.doi?.trim();
   const externalHref = linkHref || (doiValue ? `https://doi.org/${doiValue}` : '');
@@ -125,16 +151,21 @@ function ArticleCard({ article }: { article: Article }) {
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2 mb-2">
-            <Badge variant="secondary">{articleTypeLabels[article.type]}</Badge>
+            <Badge variant="secondary">{categoryLabel(article.type)}</Badge>
             <Badge variant="outline">{article.language}</Badge>
             <span className="text-sm text-muted-foreground">{article.year}</span>
           </div>
           <h3 className="font-semibold text-foreground text-lg">{article.title}</h3>
-          <p className="mt-1 text-sm text-muted-foreground">{article.source}</p>
-          {article.abstract && (
+          {article.authors ? (
+            <p className="mt-1 text-sm text-muted-foreground">{article.authors}</p>
+          ) : null}
+          {article.source ? (
+            <p className="mt-1 text-sm text-muted-foreground">{article.source}</p>
+          ) : null}
+          {article.abstract ? (
             <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{article.abstract}</p>
-          )}
-          {article.tags.length > 0 && (
+          ) : null}
+          {article.tags.length > 0 ? (
             <div className="mt-3 flex flex-wrap gap-1">
               {article.tags.map((tag) => (
                 <span
@@ -145,19 +176,28 @@ function ArticleCard({ article }: { article: Article }) {
                 </span>
               ))}
             </div>
-          )}
+          ) : null}
         </div>
-        {externalHref ? (
-          <a
-            href={externalHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-sm text-primary hover:underline shrink-0"
+        <div className="flex flex-col gap-2 shrink-0">
+          <Link
+            to={`/research/${article.slug}`}
+            className="inline-flex items-center justify-center gap-1 text-sm font-medium text-primary-foreground bg-primary px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
           >
-            <ExternalLink className="h-4 w-4" />
-            {doiValue && !linkHref ? 'DOI' : 'Bağlantı'}
-          </a>
-        ) : null}
+            Devamını Oku
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          {externalHref ? (
+            <a
+              href={externalHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-1 text-sm text-primary hover:underline"
+            >
+              <ExternalLink className="h-4 w-4" />
+              {doiValue && !linkHref ? 'DOI' : 'Dış Bağlantı'}
+            </a>
+          ) : null}
+        </div>
       </div>
     </div>
   );

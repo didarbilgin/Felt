@@ -48,6 +48,9 @@ def create_article(body: ArticleCreate, db: Session = Depends(get_db), _=Depends
         tags=data.get("tags") or [],
         link=data.get("link"),
         doi=data.get("doi"),
+        authors=data.get("authors"),
+        cover_image=data.get("cover_image"),
+        pdf_link=data.get("pdf_link"),
         status=status_str,
     )
     db.add(obj)

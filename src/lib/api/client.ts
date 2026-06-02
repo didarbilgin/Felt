@@ -27,7 +27,16 @@ export const apiRequest = async <T>(path: string, init?: RequestInit): Promise<T
 
   if (!response.ok) {
     const err = await response.json().catch(() => null);
-    throw new ApiError(response.status, err?.detail || `Request failed with ${response.status}`);
+    const detail = err?.detail;
+    const message =
+      typeof detail === 'string'
+        ? detail
+        : Array.isArray(detail)
+          ? JSON.stringify(detail)
+          : detail != null
+            ? JSON.stringify(detail)
+            : `İstek başarısız (${response.status})`;
+    throw new ApiError(response.status, message);
   }
 
   if (response.status === 204) {

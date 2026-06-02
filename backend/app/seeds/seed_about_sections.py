@@ -28,6 +28,18 @@ FELT Kurucusu"""
         "is_active": True,
     },
     {
+        "section_key": "founder-cv",
+        "title": "Kurucunun Özgeçmişi",
+        "content": """Dr. Hümeyra Kalafat, eğitim liderliği, gelecek okuryazarlığı ve teknoloji destekli öğrenme alanlarında çalışan bir akademisyen ve eğitim stratejistidir.
+
+Yüksek lisans ve doktora çalışmalarını eğitim bilimleri ve liderlik alanlarında tamamlamış; okul, üniversite ve uluslararası projelerde eğitim dönüşümü, yapay zekâ ve insan merkezli öğrenme modelleri üzerine araştırma ve uygulama programları yürütmüştür.
+
+FELT'i, eğitimin geleceğine dair düşünce, araştırma ve uygulamayı bir araya getiren büyüyen bir ekosistem olarak kurmuştur.""",
+        "items": None,
+        "sort_order": 2,
+        "is_active": True,
+    },
+    {
         "section_key": "what-is-felt",
         "title": "FELT Nedir?",
         "content": None,
@@ -48,7 +60,7 @@ FELT Kurucusu"""
                 "content": "İnsan merkezli, etik değerlere bağlı, teknoloji destekli ve gelecek odaklı bir eğitim anlayışı."
             },
         ],
-        "sort_order": 2,
+        "sort_order": 3,
         "is_active": True,
     },
     {
@@ -72,7 +84,7 @@ FELT Kurucusu"""
                 "content": "Gelecekçi liderlik, belirsizliği kucaklayan, etik değerlere bağlı kalan ve sürekli öğrenen bir liderlik anlayışıdır."
             },
         ],
-        "sort_order": 3,
+        "sort_order": 4,
         "is_active": True,
     },
     {
@@ -87,7 +99,7 @@ FELT Kurucusu"""
             {"number": "4.5", "title": "Kapsayıcılık", "content": "Herkes için erişilebilir eğitim fırsatları."},
             {"number": "4.6", "title": "Sürdürülebilirlik", "content": "Gelecek nesillere karşı sorumluluk."},
         ],
-        "sort_order": 4,
+        "sort_order": 5,
         "is_active": True,
     },
     {
@@ -102,7 +114,7 @@ FELT Kurucusu"""
             {"number": "5.5", "title": "2029", "content": "Küresel topluluk ağının 50.000 üyeye ulaşması"},
             {"number": "5.6", "title": "2030", "content": "10 ülkede FELT Model Okulları"},
         ],
-        "sort_order": 5,
+        "sort_order": 6,
         "is_active": True,
     },
     {
@@ -126,7 +138,7 @@ FELT Kurucusu"""
                 "content": "Eğitim liderlerinin değişen dünyaya uyum sağlayabilmesi için yeni liderlik modellerini ele alır."
             },
         ],
-        "sort_order": 6,
+        "sort_order": 7,
         "is_active": True,
     },
 ]

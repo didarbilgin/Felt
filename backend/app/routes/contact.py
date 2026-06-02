@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db
+from app.api.deps import get_current_admin, get_db
 from app.models.contact_message import ContactMessage
 from app.models.newsletter_subscription import NewsletterSubscription
 from app.schemas.contact import (
@@ -12,6 +12,7 @@ from app.schemas.contact import (
 )
 
 router = APIRouter(tags=["public:contact"])
+admin_router = APIRouter(prefix="/api/admin/contact-messages", tags=["admin:contact-messages"])
 
 
 @router.post("/api/contact/messages", response_model=ContactMessageOut)
@@ -43,3 +44,15 @@ def subscribe_newsletter(body: NewsletterSubscribeCreate, db: Session = Depends(
     db.commit()
     db.refresh(obj)
     return obj
+
+
+@admin_router.get("", response_model=list[ContactMessageOut])
+def list_contact_messages(
+    db: Session = Depends(get_db),
+    _=Depends(get_current_admin),
+):
+    return (
+        db.query(ContactMessage)
+        .order_by(ContactMessage.created_at.desc())
+        .all()
+    )

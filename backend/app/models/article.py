@@ -25,6 +25,9 @@ class Article(Base):
     tags: Mapped[list[str]] = mapped_column(JSON, nullable=False, server_default=text("'[]'::json"))
     link: Mapped[str | None] = mapped_column(String(500), nullable=True)
     doi: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    authors: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    cover_image: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    pdf_link: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     status: Mapped[str] = mapped_column(String(20), default="draft", nullable=False)
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

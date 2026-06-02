@@ -4,10 +4,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageHero } from '@/components/cms/PageHero';
+import { usePageContent } from '@/hooks/usePageContent';
+import { buildProgramCategoryOptions } from '@/lib/cms/programCategories';
+import { getSection } from '@/lib/cms/pages';
 import { programsApi } from '@/lib/api/programs';
-import { Program, ProgramCategory, programCategoryLabels, programStatusLabels } from '@/lib/types';
+import {
+  Program,
+  ProgramCategory,
+  programCategoryLabels,
+  programStatusLabels,
+} from '@/lib/types';
 
-const programCategories = [
+const fallbackProgramCategories = [
   { value: 'all', label: 'Tümü' },
   { value: 'education-module', label: 'Eğitim Modülleri' },
   { value: 'mentorship', label: 'Mentorluk' },
@@ -16,6 +25,20 @@ const programCategories = [
 ];
 
 export default function Programs() {
+  const { heroTitle, heroSubtitle, sections } = usePageContent('programs', {
+    title: 'Programlar',
+    subtitle: 'Eğitimciler, yöneticiler ve topluluklar için tasarlanmış profesyonel gelişim programları',
+  });
+  const cta = getSection(sections, 'cta');
+  const cmsCategories = buildProgramCategoryOptions(sections);
+  const programCategories =
+    cmsCategories.length > 0 ? cmsCategories : fallbackProgramCategories;
+
+  const categoryLabel = (slug: string) =>
+    programCategories.find((c) => c.value === slug)?.label ||
+    programCategoryLabels[slug as ProgramCategory] ||
+    slug;
+
   const [programs, setPrograms] = useState<Program[]>([]);
   const [activeTab, setActiveTab] = useState<ProgramCategory | 'all'>('all');
   const [loading, setLoading] = useState(true);
@@ -36,15 +59,7 @@ export default function Programs() {
 
   return (
     <div>
-      {/* Page Header */}
-      <section className="bg-primary text-primary-foreground py-16 md:py-20">
-        <div className="container-wide">
-          <h1 className="font-heading text-4xl md:text-5xl font-bold">Programlar</h1>
-          <p className="mt-4 text-lg text-primary-foreground/80 max-w-2xl">
-            Eğitimciler, yöneticiler ve topluluklar için tasarlanmış profesyonel gelişim programları
-          </p>
-        </div>
-      </section>
+      <PageHero title={heroTitle} subtitle={heroSubtitle} />
 
       {/* Content */}
       <section className="section-padding">
@@ -72,7 +87,11 @@ export default function Programs() {
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredPrograms.map((program) => (
-                    <ProgramCard key={program.id} program={program} />
+                    <ProgramCard
+                      key={program.id}
+                      program={program}
+                      categoryLabel={categoryLabel(program.category)}
+                    />
                   ))}
                 </div>
               )}
@@ -85,14 +104,13 @@ export default function Programs() {
       <section className="py-16 bg-muted">
         <div className="container-wide text-center">
           <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground">
-            Kurumunuz için Özel Program mu Arıyorsunuz?
+            {cta?.title || 'Kurumunuz için Özel Program'}
           </h2>
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            FELT Dönüşüm Paketleri ile okulunuzu geleceğe hazırlayın.
-            Size özel çözümler için iletişime geçin.
+            {cta?.subtitle || 'FELT Dönüşüm Paketleri ile okulunuzu geleceğe hazırlayın. Size özel çözümler için iletişime geçin.'}
           </p>
           <Button className="mt-6" size="lg" asChild>
-            <a href="/contact">İletişime Geçin</a>
+            <a href="/contact">{cta?.content || 'İletişime Geçin'}</a>
           </Button>
         </div>
       </section>
@@ -100,12 +118,18 @@ export default function Programs() {
   );
 }
 
-function ProgramCard({ program }: { program: Program }) {
+function ProgramCard({
+  program,
+  categoryLabel: categoryDisplay,
+}: {
+  program: Program;
+  categoryLabel: string;
+}) {
   return (
     <Card className="card-hover border-border">
       <CardHeader>
         <div className="flex items-center gap-2 mb-2">
-          <Badge variant="secondary">{programCategoryLabels[program.category]}</Badge>
+          <Badge variant="secondary">{categoryDisplay}</Badge>
           <Badge
             variant={program.status === 'active' ? 'default' : 'outline'}
             className={program.status === 'active' ? 'bg-green-600' : ''}

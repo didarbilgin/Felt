@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,12 +9,17 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { formatApiErrorMessage } from '@/lib/api/errorMessage';
 import { eventsApi } from '@/lib/api/events';
-import { Event, EventStatus, EventType, eventStatusLabels, eventTypeLabels } from '@/lib/types';
+import { buildFormCategoryOptions } from '@/lib/cms/categoryTabs';
+import { pagesApi } from '@/lib/cms/pages';
+import { Event, EventStatus, eventStatusLabels, eventTypeLabels } from '@/lib/types';
+
+const EVENT_FORM_EXCLUDE = ['all', 'upcoming', 'past'];
 
 type EventFormState = {
   title: string;
-  type: EventType;
+  type: string;
   date: string;
   location: string;
   description: string;
@@ -38,6 +43,25 @@ export default function AdminEvents() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Event | null>(null);
   const [form, setForm] = useState<EventFormState>(emptyForm);
+  const [typeOptions, setTypeOptions] = useState<{ value: string; label: string }[]>([]);
+
+  const typeSelectOptions = useMemo(() => {
+    if (typeOptions.length > 0) return typeOptions;
+    return Object.entries(eventTypeLabels)
+      .filter(([k]) => k !== 'masterclass')
+      .map(([value, label]) => ({ value, label }));
+  }, [typeOptions]);
+
+  const resolveTypeLabel = (type: string) =>
+    typeSelectOptions.find((o) => o.value === type)?.label ||
+    eventTypeLabels[type as keyof typeof eventTypeLabels] ||
+    type;
+
+  const loadCategories = async () => {
+    const page = await pagesApi.getAdminPage('events');
+    const options = buildFormCategoryOptions(page?.sections, 'event-tabs', EVENT_FORM_EXCLUDE);
+    if (options.length > 0) setTypeOptions(options);
+  };
 
   const load = async () => {
     setEvents(await eventsApi.getAll());
@@ -45,6 +69,7 @@ export default function AdminEvents() {
 
   useEffect(() => {
     load();
+    loadCategories();
   }, []);
 
   const handleSave = async () => {
@@ -57,13 +82,24 @@ export default function AdminEvents() {
       link: form.link.trim() ? form.link : undefined,
       status: form.status,
     };
-    if (editing) await eventsApi.update(editing.id, payload);
-    else await eventsApi.create(payload);
-    toast({ title: editing ? 'Güncellendi' : 'Oluşturuldu' });
-    setOpen(false);
-    setEditing(null);
-    setForm(emptyForm());
-    load();
+    try {
+      if (editing) await eventsApi.update(editing.id, payload);
+      else await eventsApi.create(payload);
+      toast({ title: editing ? 'Güncellendi' : 'Oluşturuldu' });
+      setOpen(false);
+      setEditing(null);
+      setForm({
+        ...emptyForm(),
+        type: typeSelectOptions[0]?.value || 'webinar',
+      });
+      load();
+    } catch (e) {
+      toast({
+        variant: 'destructive',
+        title: 'Kayıt başarısız',
+        description: formatApiErrorMessage(e),
+      });
+    }
   };
 
   const handleEdit = (e: Event) => {
@@ -81,9 +117,17 @@ export default function AdminEvents() {
   };
 
   const handleDelete = async (id: string) => {
-    await eventsApi.delete(id);
-    toast({ title: 'Silindi' });
-    load();
+    try {
+      await eventsApi.delete(id);
+      toast({ title: 'Silindi' });
+      load();
+    } catch (e) {
+      toast({
+        variant: 'destructive',
+        title: 'Silinemedi',
+        description: formatApiErrorMessage(e),
+      });
+    }
   };
 
   return (
@@ -96,7 +140,10 @@ export default function AdminEvents() {
             setOpen(o);
             if (!o) {
               setEditing(null);
-              setForm(emptyForm());
+              setForm({
+                ...emptyForm(),
+                type: typeSelectOptions[0]?.value || 'webinar',
+              });
             }
           }}
         >
@@ -118,18 +165,16 @@ export default function AdminEvents() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label>Tür</Label>
-                  <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as EventType })}>
+                  <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(eventTypeLabels)
-                        .filter(([k]) => k !== 'masterclass')
-                        .map(([k, v]) => (
-                          <SelectItem key={k} value={k}>
-                            {v}
-                          </SelectItem>
-                        ))}
+                      {typeSelectOptions.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -191,7 +236,7 @@ export default function AdminEvents() {
               <TableRow key={e.id}>
                 <TableCell className="font-medium">{e.title}</TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{eventTypeLabels[e.type]}</Badge>
+                  <Badge variant="secondary">{resolveTypeLabel(e.type)}</Badge>
                 </TableCell>
                 <TableCell>{e.date.toLocaleDateString('tr-TR')}</TableCell>
                 <TableCell>

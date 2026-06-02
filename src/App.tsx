@@ -2,13 +2,15 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { AdminLayout } from "@/components/layout/AdminLayout";
-import AdminAbout from "@/pages/admin/AdminAbout";
+import AdminContactMessages from "@/pages/admin/AdminContactMessages";
+import AdminPages from "@/pages/admin/AdminPages";
 import Home from "@/pages/Home";
 import About from "@/pages/About";
 import Research from "@/pages/Research";
+import ResearchArticle from "@/pages/ResearchArticle";
 import Programs from "@/pages/Programs";
 import Lab from "@/pages/Lab";
 import Events from "@/pages/Events";
@@ -38,6 +40,7 @@ const App = () => (
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/research" element={<Research />} />
+            <Route path="/research/:slug" element={<ResearchArticle />} />
             <Route path="/programs" element={<Programs />} />
             <Route path="/lab" element={<Lab />} />
             <Route path="/events" element={<Events />} />
@@ -50,7 +53,9 @@ const App = () => (
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout />}>
-            <Route path="about" element={<AdminAbout />} />
+            <Route path="about" element={<Navigate to="/admin/pages?page=about" replace />} />
+            <Route path="pages" element={<AdminPages />} />
+            <Route path="contact-messages" element={<AdminContactMessages />} />
             <Route index element={<AdminDashboard />} />
             <Route path="articles" element={<AdminArticles />} />
             <Route path="programs" element={<AdminPrograms />} />

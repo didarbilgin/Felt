@@ -23,6 +23,7 @@ export type ArticleType = 'article' | 'conference' | 'report' | 'book' | 'scale'
 export interface Article {
   id: string;
   title: string;
+  slug: string;
   type: ArticleType;
   year: number;
   language: Language;
@@ -30,9 +31,13 @@ export interface Article {
   tags: string[];
   link?: string;
   doi?: string;
+  authors?: string;
+  coverImage?: string;
+  pdfLink?: string;
   abstract?: string;
   content: string;
   status: ArticleStatus;
+  publishedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,7 +52,8 @@ export type ProgramCategory =
 export interface Program {
   id: string;
   title: string;
-  category: ProgramCategory;
+  /** Slug from CMS program categories or legacy fixed keys */
+  category: ProgramCategory | string;
   targetAudience: string;
   description: string;
   duration: string;
@@ -164,9 +170,9 @@ export const blogCategoryLabels: Record<BlogCategory, string> = {
 };
 
 export const contactTypeLabels: Record<ContactType, string> = {
-  general: 'Genel İletişim',
-  collaboration: 'İş Birliği',
-  'press-academic': 'Basın & Akademik Davet',
+  general: 'Genel Mesaj',
+  collaboration: 'Öneri veya Görüş',
+  'press-academic': 'Basın ve Akademik',
 };
 
 export const articleStatusLabels: Record<ArticleStatus, string> = {

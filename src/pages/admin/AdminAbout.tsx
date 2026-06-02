@@ -27,6 +27,16 @@ type AboutSection = {
     is_active: boolean;
 };
 
+const ABOUT_SECTION_LABELS: Record<string, string> = {
+    founder: 'Kurucunun Mesajı',
+    'founder-cv': 'Kurucunun Özgeçmişi',
+    'what-is-felt': 'FELT Nedir?',
+    manifesto: 'Manifesto',
+    values: 'Değerler ve İlkeler',
+    roadmap: 'Stratejik Yol Haritası',
+    'research-areas': 'Araştırma Alanları',
+};
+
 const getAuthHeaders = () => {
     const currentUser = authApi.getCurrentUser();
 
@@ -196,18 +206,23 @@ export default function AdminAbout() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="font-heading text-3xl font-bold">Hakkında CMS</h1>
+                <h1 className="font-heading text-3xl font-bold">Hakkında Sayfası</h1>
                 <p className="text-muted-foreground mt-1">
-                    Hakkında sayfasındaki başlıkları ve alt içerikleri buradan yönetebilirsiniz.
+                    Hakkında sayfasındaki bölüm başlıklarını ve metinleri buradan düzenleyebilirsiniz.
                 </p>
             </div>
 
-            {sections.map((section, sectionIndex) => (
+            {sections.map((section, sectionIndex) => {
+                const isCvSection = section.section_key === 'founder-cv';
+                const sectionLabel =
+                    ABOUT_SECTION_LABELS[section.section_key] || section.title;
+
+                return (
                 <Card key={section.id}>
                     <CardHeader>
                         <CardTitle className="flex items-center justify-between gap-4">
                             <span>
-                                {section.sort_order}. {section.title}
+                                {section.sort_order}. {sectionLabel}
                             </span>
 
                             <div className="flex items-center gap-3">
@@ -228,7 +243,7 @@ export default function AdminAbout() {
 
                     <CardContent className="space-y-5">
                         <div className="grid gap-2">
-                            <Label>Ana Başlık</Label>
+                            <Label>Bölüm Başlığı</Label>
                             <Input
                                 value={section.title}
                                 onChange={(e) =>
@@ -237,21 +252,22 @@ export default function AdminAbout() {
                             />
                         </div>
 
-                        <div className="grid gap-2">
-                            <Label>Sıralama</Label>
-                            <Input
-                                type="number"
-                                value={section.sort_order}
-                                onChange={(e) =>
-                                    updateSectionField(
-                                        sectionIndex,
-                                        "sort_order",
-                                        Number(e.target.value)
-                                    )
-                                }
-                            />
-                        </div>
-
+                        {isCvSection ? (
+                            <div className="grid gap-2">
+                                <Label>Özgeçmiş metni</Label>
+                                <Textarea
+                                    rows={12}
+                                    value={section.content || ""}
+                                    onChange={(e) =>
+                                        updateSectionField(
+                                            sectionIndex,
+                                            "content",
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                            </div>
+                        ) : (
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <Label>Alt Başlıklar / İçerikler</Label>
@@ -271,24 +287,8 @@ export default function AdminAbout() {
                                     key={itemIndex}
                                     className="border rounded-lg p-4 space-y-3 bg-muted/30"
                                 >
-                                    <div className="grid grid-cols-12 gap-3">
-                                        <div className="col-span-2">
-                                            <Label>No</Label>
-                                            <Input
-                                                value={item.number || ""}
-                                                onChange={(e) =>
-                                                    updateItemField(
-                                                        sectionIndex,
-                                                        itemIndex,
-                                                        "number",
-                                                        e.target.value
-                                                    )
-                                                }
-                                                placeholder="2.1"
-                                            />
-                                        </div>
-
-                                        <div className="col-span-9">
+                                    <div className="flex gap-3 items-start">
+                                        <div className="flex-1">
                                             <Label>Alt Başlık</Label>
                                             <Input
                                                 value={item.title}
@@ -303,16 +303,15 @@ export default function AdminAbout() {
                                             />
                                         </div>
 
-                                        <div className="col-span-1 flex items-end">
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => removeItem(sectionIndex, itemIndex)}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="mt-8 shrink-0"
+                                            onClick={() => removeItem(sectionIndex, itemIndex)}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
                                     </div>
 
                                     <div className="grid gap-2">
@@ -333,9 +332,11 @@ export default function AdminAbout() {
                                 </div>
                             ))}
                         </div>
+                        )}
                     </CardContent>
                 </Card>
-            ))}
+            );
+            })}
         </div>
     );
 }

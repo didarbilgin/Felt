@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,12 +9,15 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { formatApiErrorMessage } from '@/lib/api/errorMessage';
 import { articlesApi } from '@/lib/api/articles';
-import { Article, ArticleStatus, ArticleType, Language, articleTypeLabels, articleStatusLabels } from '@/lib/types';
+import { buildFormCategoryOptions } from '@/lib/cms/categoryTabs';
+import { pagesApi } from '@/lib/cms/pages';
+import { Article, ArticleStatus, Language, articleTypeLabels, articleStatusLabels } from '@/lib/types';
 
 const initialForm = {
   title: '',
-  type: 'article' as ArticleType,
+  type: 'article',
   year: new Date().getFullYear(),
   language: 'TR' as Language,
   source: '',
@@ -30,6 +33,23 @@ export default function AdminArticles() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Article | null>(null);
   const [form, setForm] = useState(initialForm);
+  const [typeOptions, setTypeOptions] = useState<{ value: string; label: string }[]>([]);
+
+  const loadCategories = async () => {
+    const page = await pagesApi.getAdminPage('research');
+    const options = buildFormCategoryOptions(page?.sections, 'article-tabs');
+    if (options.length > 0) setTypeOptions(options);
+  };
+
+  const typeSelectOptions = useMemo(() => {
+    if (typeOptions.length > 0) return typeOptions;
+    return Object.entries(articleTypeLabels).map(([value, label]) => ({ value, label }));
+  }, [typeOptions]);
+
+  const resolveTypeLabel = (type: string) =>
+    typeSelectOptions.find((o) => o.value === type)?.label ||
+    articleTypeLabels[type as keyof typeof articleTypeLabels] ||
+    type;
 
   const load = async () => {
     try {
@@ -38,7 +58,7 @@ export default function AdminArticles() {
       toast({
         variant: 'destructive',
         title: 'Liste yüklenemedi',
-        description: e instanceof Error ? e.message : undefined,
+        description: formatApiErrorMessage(e, 'Liste yüklenemedi.'),
       });
       setArticles([]);
     }
@@ -46,11 +66,13 @@ export default function AdminArticles() {
 
   useEffect(() => {
     load();
+    loadCategories();
   }, []);
 
   const resetForm = () => {
     setForm({
       ...initialForm,
+      type: typeSelectOptions[0]?.value || 'article',
       year: new Date().getFullYear(),
     });
   };
@@ -64,18 +86,24 @@ export default function AdminArticles() {
         .filter(Boolean),
     };
 
-    if (editing) {
-      await articlesApi.update(editing.id, data);
-    } else {
-      await articlesApi.create(data);
+    try {
+      if (editing) {
+        await articlesApi.update(editing.id, data);
+      } else {
+        await articlesApi.create(data);
+      }
+      toast({ title: editing ? 'Güncellendi' : 'Oluşturuldu' });
+      setOpen(false);
+      setEditing(null);
+      resetForm();
+      load();
+    } catch (e) {
+      toast({
+        variant: 'destructive',
+        title: 'Kayıt başarısız',
+        description: formatApiErrorMessage(e),
+      });
     }
-
-    toast({ title: editing ? 'Güncellendi' : 'Oluşturuldu' });
-
-    setOpen(false);
-    setEditing(null);
-    resetForm();
-    load();
   };
 
   const handleEdit = (article: Article) => {
@@ -95,9 +123,17 @@ export default function AdminArticles() {
   };
 
   const handleDelete = async (id: string) => {
-    await articlesApi.delete(id);
-    toast({ title: 'Silindi' });
-    load();
+    try {
+      await articlesApi.delete(id);
+      toast({ title: 'Silindi' });
+      load();
+    } catch (e) {
+      toast({
+        variant: 'destructive',
+        title: 'Silinemedi',
+        description: formatApiErrorMessage(e),
+      });
+    }
   };
 
   const handleDialogChange = (isOpen: boolean) => {
@@ -141,15 +177,15 @@ export default function AdminArticles() {
                   <Label>Tür</Label>
                   <Select
                     value={form.type}
-                    onValueChange={(value) => setForm({ ...form, type: value as ArticleType })}
+                    onValueChange={(value) => setForm({ ...form, type: value })}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(articleTypeLabels).map(([key, value]) => (
-                        <SelectItem key={key} value={key}>
-                          {value}
+                      {typeSelectOptions.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -261,7 +297,7 @@ export default function AdminArticles() {
               <TableRow key={article.id}>
                 <TableCell className="font-medium">{article.title}</TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{articleTypeLabels[article.type]}</Badge>
+                  <Badge variant="secondary">{resolveTypeLabel(article.type)}</Badge>
                 </TableCell>
                 <TableCell>{article.year}</TableCell>
                 <TableCell>{article.language}</TableCell>

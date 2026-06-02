@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,12 +9,15 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { formatApiErrorMessage } from '@/lib/api/errorMessage';
 import { blogApi } from '@/lib/api/blog';
-import { BlogPost, BlogCategory, BlogStatus, blogCategoryLabels, blogStatusLabels } from '@/lib/types';
+import { buildFormCategoryOptions } from '@/lib/cms/categoryTabs';
+import { pagesApi } from '@/lib/cms/pages';
+import { BlogPost, BlogStatus, blogCategoryLabels, blogStatusLabels } from '@/lib/types';
 
 type BlogFormState = {
   title: string;
-  category: BlogCategory;
+  category: string;
   content: string;
   excerpt: string;
   publishDate: string;
@@ -36,6 +39,23 @@ export default function AdminBlog() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<BlogPost | null>(null);
   const [form, setForm] = useState<BlogFormState>(emptyForm());
+  const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
+
+  const categorySelectOptions = useMemo(() => {
+    if (categoryOptions.length > 0) return categoryOptions;
+    return Object.entries(blogCategoryLabels).map(([value, label]) => ({ value, label }));
+  }, [categoryOptions]);
+
+  const resolveCategoryLabel = (category: string) =>
+    categorySelectOptions.find((o) => o.value === category)?.label ||
+    blogCategoryLabels[category as keyof typeof blogCategoryLabels] ||
+    category;
+
+  const loadCategories = async () => {
+    const page = await pagesApi.getAdminPage('blog');
+    const options = buildFormCategoryOptions(page?.sections, 'blog-tabs');
+    if (options.length > 0) setCategoryOptions(options);
+  };
 
   const load = async () => {
     setPosts(await blogApi.getAll());
@@ -43,10 +63,14 @@ export default function AdminBlog() {
 
   useEffect(() => {
     load();
+    loadCategories();
   }, []);
 
   const resetForm = () => {
-    setForm(emptyForm());
+    setForm({
+      ...emptyForm(),
+      category: categorySelectOptions[0]?.value || 'essay',
+    });
   };
 
   const handleSave = async () => {
@@ -55,17 +79,24 @@ export default function AdminBlog() {
       publishDate: new Date(form.publishDate),
     };
 
-    if (editing) {
-      await blogApi.update(editing.id, data);
-    } else {
-      await blogApi.create(data);
+    try {
+      if (editing) {
+        await blogApi.update(editing.id, data);
+      } else {
+        await blogApi.create(data);
+      }
+      toast({ title: editing ? 'Güncellendi' : 'Oluşturuldu' });
+      setOpen(false);
+      setEditing(null);
+      resetForm();
+      load();
+    } catch (e) {
+      toast({
+        variant: 'destructive',
+        title: 'Kayıt başarısız',
+        description: formatApiErrorMessage(e),
+      });
     }
-
-    toast({ title: editing ? 'Güncellendi' : 'Oluşturuldu' });
-    setOpen(false);
-    setEditing(null);
-    resetForm();
-    load();
   };
 
   const handleEdit = (post: BlogPost) => {
@@ -82,9 +113,17 @@ export default function AdminBlog() {
   };
 
   const handleDelete = async (id: string) => {
-    await blogApi.delete(id);
-    toast({ title: 'Silindi' });
-    load();
+    try {
+      await blogApi.delete(id);
+      toast({ title: 'Silindi' });
+      load();
+    } catch (e) {
+      toast({
+        variant: 'destructive',
+        title: 'Silinemedi',
+        description: formatApiErrorMessage(e),
+      });
+    }
   };
 
   const handleDialogChange = (isOpen: boolean) => {
@@ -128,17 +167,15 @@ export default function AdminBlog() {
                   <Label>Kategori</Label>
                   <Select
                     value={form.category}
-                    onValueChange={(value) =>
-                      setForm({ ...form, category: value as BlogCategory })
-                    }
+                    onValueChange={(value) => setForm({ ...form, category: value })}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(blogCategoryLabels).map(([key, value]) => (
-                        <SelectItem key={key} value={key}>
-                          {value}
+                      {categorySelectOptions.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -217,7 +254,7 @@ export default function AdminBlog() {
               <TableRow key={post.id}>
                 <TableCell className="font-medium">{post.title}</TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{blogCategoryLabels[post.category]}</Badge>
+                  <Badge variant="secondary">{resolveCategoryLabel(post.category)}</Badge>
                 </TableCell>
                 <TableCell>{post.publishDate.toLocaleDateString('tr-TR')}</TableCell>
                 <TableCell>
