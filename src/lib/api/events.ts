@@ -7,7 +7,8 @@ import {
 } from '@/lib/types';
 import { apiRequest } from '@/lib/api/client';
 
-const EVENTS_PATH = '/api/admin/events';
+const ADMIN_EVENTS_PATH = '/api/admin/events';
+const PUBLIC_EVENTS_PATH = '/api/events';
 
 type BackendEvent = {
   id: string;
@@ -106,73 +107,55 @@ const byDateDesc = (a: Event, b: Event) =>
   b.date.getTime() - a.date.getTime();
 
 export const eventsApi = {
-  getAll: async (): Promise<Event[]> => {
-    const data = await apiRequest<BackendEvent[]>(
-      EVENTS_PATH,
-      { method: 'GET' },
-    );
-
+  /** Public site — non-archived events (no auth). */
+  listPublic: async (): Promise<Event[]> => {
+    const data = await apiRequest<BackendEvent[]>(PUBLIC_EVENTS_PATH, { method: 'GET' });
     return data.map(toFrontend).sort(byDateDesc);
   },
 
-  getByType: async (type: EventType): Promise<Event[]> => {
-    const all = await eventsApi.getAll();
-
+  getByType: async (type: EventType | string): Promise<Event[]> => {
+    const all = await eventsApi.listPublic();
     return all
       .filter((event) => event.type === type)
-      .filter((event) => event.status !== 'archived')
       .sort(byDateDesc);
   },
 
   getUpcoming: async (): Promise<Event[]> => {
-    const all = await eventsApi.getAll();
-
+    const all = await eventsApi.listPublic();
     return all
-      .filter(
-        (event) =>
-          getEventDisplayStatus(event) === 'upcoming',
-      )
+      .filter((event) => getEventDisplayStatus(event) === 'upcoming')
       .sort((a, b) => a.date.getTime() - b.date.getTime());
   },
 
   getPast: async (): Promise<Event[]> => {
-    const all = await eventsApi.getAll();
-
+    const all = await eventsApi.listPublic();
     return all
-      .filter(
-        (event) =>
-          getEventDisplayStatus(event) === 'completed',
-      )
+      .filter((event) => getEventDisplayStatus(event) === 'completed')
       .sort(byDateDesc);
   },
 
-  getById: async (
-    id: string,
-  ): Promise<Event | undefined> => {
-    const data = await apiRequest<BackendEvent>(
-      `${EVENTS_PATH}/${id}`,
-      { method: 'GET' },
-    );
+  /** Admin — all events (auth required). */
+  getAll: async (): Promise<Event[]> => {
+    const data = await apiRequest<BackendEvent[]>(ADMIN_EVENTS_PATH, { method: 'GET' });
+    return data.map(toFrontend).sort(byDateDesc);
+  },
 
+  getById: async (id: string): Promise<Event | undefined> => {
+    const data = await apiRequest<BackendEvent>(`${ADMIN_EVENTS_PATH}/${id}`, {
+      method: 'GET',
+    });
     return toFrontend(data);
   },
 
-  create: async (
-    data: CreateEventData,
-  ): Promise<Event> => {
+  create: async (data: CreateEventData): Promise<Event> => {
     const payload = toBackendCreate(data);
-
-    const created = await apiRequest<BackendEvent>(
-      EVENTS_PATH,
-      {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+    const created = await apiRequest<BackendEvent>(ADMIN_EVENTS_PATH, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: {
+        'Content-Type': 'application/json',
       },
-    );
-
+    });
     return toFrontend(created);
   },
 
@@ -181,27 +164,20 @@ export const eventsApi = {
     data: Partial<CreateEventData>,
   ): Promise<Event | undefined> => {
     const payload = mapToBackendPayload(data);
-
-    const updated = await apiRequest<BackendEvent>(
-      `${EVENTS_PATH}/${id}`,
-      {
-        method: 'PUT',
-        body: JSON.stringify(payload),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+    const updated = await apiRequest<BackendEvent>(`${ADMIN_EVENTS_PATH}/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+      headers: {
+        'Content-Type': 'application/json',
       },
-    );
-
+    });
     return toFrontend(updated);
   },
 
   delete: async (id: string): Promise<boolean> => {
-    await apiRequest<{ ok: boolean }>(
-      `${EVENTS_PATH}/${id}`,
-      { method: 'DELETE' },
-    );
-
+    await apiRequest<{ ok: boolean }>(`${ADMIN_EVENTS_PATH}/${id}`, {
+      method: 'DELETE',
+    });
     return true;
   },
 

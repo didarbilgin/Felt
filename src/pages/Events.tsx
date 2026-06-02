@@ -7,6 +7,7 @@ import { PageHero } from '@/components/cms/PageHero';
 import { usePageContent } from '@/hooks/usePageContent';
 import { buildCategoryTabOptions } from '@/lib/cms/categoryTabs';
 import { getSection } from '@/lib/cms/pages';
+import { ApiError } from '@/lib/ApiError';
 import { eventsApi } from '@/lib/api/events';
 import {
   Event,
@@ -35,7 +36,7 @@ const formatEventDate = (date: Date) =>
 export default function Events() {
   const { heroTitle, heroSubtitle, sections } = usePageContent('events', {
     title: 'Etkinlikler',
-    subtitle: 'Zirve, webinar, masterclass ve topluluk buluşmaları',
+    subtitle: 'Zirve, webinar ve topluluk buluşmaları',
   });
   const highlight = getSection(sections, 'highlight');
   const cmsEventTypes = buildCategoryTabOptions(sections, 'event-tabs');
@@ -44,13 +45,25 @@ export default function Events() {
   const [events, setEvents] = useState<Event[]>([]);
   const [activeTab, setActiveTab] = useState<string>('upcoming');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadEvents = async () => {
       setLoading(true);
-      const data = await eventsApi.getAll();
-      setEvents(data);
-      setLoading(false);
+      setLoadError(null);
+      try {
+        const data = await eventsApi.listPublic();
+        setEvents(data);
+      } catch (e) {
+        setEvents([]);
+        setLoadError(
+          e instanceof ApiError
+            ? e.message || 'İçerik yüklenemedi.'
+            : 'İçerik yüklenemedi.'
+        );
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadEvents();
@@ -211,7 +224,9 @@ export default function Events() {
                   </TabsList>
 
                   <TabsContent value={activeTab} className="mt-0">
-                    {loading ? (
+                    {loadError ? (
+                      <div className="text-center py-12 text-destructive">{loadError}</div>
+                    ) : loading ? (
                       <div className="text-center py-12 text-muted-foreground">Yükleniyor...</div>
                     ) : filteredEvents.length === 0 ? (
                       <div className="text-center py-12 text-muted-foreground">
@@ -242,9 +257,8 @@ function EventCard({ event }: { event: Event }) {
 
   return (
     <article
-      className={`flex flex-col md:flex-row md:items-start gap-5 md:gap-8 rounded-xl border border-border bg-background p-6 md:p-8 transition-shadow hover:shadow-md ${
-        isDimmed ? 'opacity-85 border-muted-foreground/20' : ''
-      }`}
+      className={`flex flex-col md:flex-row md:items-start gap-5 md:gap-8 rounded-xl border border-border bg-background p-6 md:p-8 transition-shadow hover:shadow-md ${isDimmed ? 'opacity-85 border-muted-foreground/20' : ''
+        }`}
     >
       <div className="md:w-44 lg:w-52 shrink-0 space-y-3">
         <div className="flex flex-wrap gap-2">

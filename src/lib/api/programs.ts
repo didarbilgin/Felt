@@ -1,12 +1,13 @@
 import { CreateProgramData, Program, ProgramCategory } from '@/lib/types';
 import { apiRequest } from '@/lib/api/client';
 
-const PROGRAMS_PATH = '/api/admin/programs';
+const ADMIN_PROGRAMS_PATH = '/api/admin/programs';
+const PUBLIC_PROGRAMS_PATH = '/api/programs';
 
 type BackendProgram = {
   id: string;
   title: string;
-  category: ProgramCategory;
+  category: ProgramCategory | string;
   target_audience: string;
   description: string;
   duration: string;
@@ -17,7 +18,7 @@ type BackendProgram = {
 
 type BackendProgramPayload = {
   title: string;
-  category: ProgramCategory;
+  category: ProgramCategory | string;
   target_audience: string;
   description: string;
   duration: string;
@@ -29,7 +30,7 @@ const byNewest = (a: Program, b: Program) => b.createdAt.getTime() - a.createdAt
 const mapProgram = (item: BackendProgram): Program => ({
   id: item.id,
   title: item.title,
-  category: item.category,
+  category: item.category as Program['category'],
   targetAudience: item.target_audience,
   description: item.description,
   duration: item.duration,
@@ -48,28 +49,32 @@ const mapToBackend = (data: CreateProgramData | Partial<CreateProgramData>): Par
 });
 
 export const programsApi = {
-  getAll: async (): Promise<Program[]> => {
-    const data = await apiRequest<BackendProgram[]>(PROGRAMS_PATH, { method: 'GET' });
+  /** Public site — active programs only (no auth). */
+  getPublished: async (): Promise<Program[]> => {
+    const data = await apiRequest<BackendProgram[]>(PUBLIC_PROGRAMS_PATH, { method: 'GET' });
     return data.map(mapProgram).sort(byNewest);
   },
 
-  getByCategory: async (category: ProgramCategory): Promise<Program[]> => {
-    const all = await programsApi.getAll();
+  getActive: async (): Promise<Program[]> => programsApi.getPublished(),
+
+  getByCategory: async (category: ProgramCategory | string): Promise<Program[]> => {
+    const all = await programsApi.getPublished();
     return all.filter((program) => program.category === category);
   },
 
-  getActive: async (): Promise<Program[]> => {
-    const all = await programsApi.getAll();
-    return all.filter((program) => program.status === 'active');
+  /** Admin — all programs (auth required). */
+  getAll: async (): Promise<Program[]> => {
+    const data = await apiRequest<BackendProgram[]>(ADMIN_PROGRAMS_PATH, { method: 'GET' });
+    return data.map(mapProgram).sort(byNewest);
   },
 
   getById: async (id: string): Promise<Program | undefined> => {
-    const item = await apiRequest<BackendProgram>(`${PROGRAMS_PATH}/${id}`, { method: 'GET' });
+    const item = await apiRequest<BackendProgram>(`${ADMIN_PROGRAMS_PATH}/${id}`, { method: 'GET' });
     return mapProgram(item);
   },
 
   create: async (data: CreateProgramData): Promise<Program> => {
-    const created = await apiRequest<BackendProgram>(PROGRAMS_PATH, {
+    const created = await apiRequest<BackendProgram>(ADMIN_PROGRAMS_PATH, {
       method: 'POST',
       body: JSON.stringify(mapToBackend(data)),
       headers: {
@@ -81,7 +86,7 @@ export const programsApi = {
   },
 
   update: async (id: string, data: Partial<CreateProgramData>): Promise<Program | undefined> => {
-    const updated = await apiRequest<BackendProgram>(`${PROGRAMS_PATH}/${id}`, {
+    const updated = await apiRequest<BackendProgram>(`${ADMIN_PROGRAMS_PATH}/${id}`, {
       method: 'PUT',
       body: JSON.stringify(mapToBackend(data)),
       headers: {
@@ -93,12 +98,12 @@ export const programsApi = {
   },
 
   delete: async (id: string): Promise<boolean> => {
-    await apiRequest<{ ok: boolean }>(`${PROGRAMS_PATH}/${id}`, { method: 'DELETE' });
+    await apiRequest<{ ok: boolean }>(`${ADMIN_PROGRAMS_PATH}/${id}`, { method: 'DELETE' });
     return true;
   },
 
   getFeatured: async (): Promise<Program | undefined> => {
-    const active = await programsApi.getActive();
+    const active = await programsApi.getPublished();
     return active[0];
   },
 };

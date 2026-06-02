@@ -51,6 +51,8 @@ export function Header() {
             variant="ghost"
             size="icon"
             className="lg:hidden"
+            aria-label={mobileMenuOpen ? 'Menüyü kapat' : 'Menüyü aç'}
+            aria-expanded={mobileMenuOpen}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

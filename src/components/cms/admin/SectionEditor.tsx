@@ -75,7 +75,6 @@ export function SectionEditor(props: SectionEditorProps) {
         onUpdateSection={onUpdateSection}
         onSave={handleSave}
         onSortOrderChange={onSortOrderChange}
-        showActiveToggle={false}
       >
         <div>
           <Label>Başlık / rozet metni</Label>
@@ -378,6 +377,9 @@ export function SectionEditor(props: SectionEditorProps) {
   }
 
   if (variant === 'cta') {
+    const showBulletItems =
+      section.section_key === 'network-cta' || (section.items?.length ?? 0) > 0;
+
     return (
       <SectionCardShell
         title={adminLabel}
@@ -386,7 +388,6 @@ export function SectionEditor(props: SectionEditorProps) {
         onUpdateSection={onUpdateSection}
         onSave={handleSave}
         onSortOrderChange={onSortOrderChange}
-        showActiveToggle={false}
       >
         <div>
           <Label>Başlık</Label>
@@ -413,6 +414,41 @@ export function SectionEditor(props: SectionEditorProps) {
             onChange={(e) => onUpdateSection(sectionIndex, 'content', e.target.value)}
           />
         </div>
+        {showBulletItems ? (
+          <div className="space-y-3 border-t pt-4">
+            <Label>Çağrı maddeleri</Label>
+            {(section.items || []).map((item, itemIndex) => (
+              <div key={itemIndex} className="flex gap-2">
+                <Input
+                  className="flex-1"
+                  value={item.title || ''}
+                  placeholder="Madde metni"
+                  onChange={(e) =>
+                    onUpdateItem(sectionIndex, itemIndex, 'title', e.target.value)
+                  }
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive shrink-0"
+                  onClick={() => onRemoveItem(sectionIndex, itemIndex)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => onAddItem(sectionIndex, { title: '' })}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Madde Ekle
+            </Button>
+          </div>
+        ) : null}
       </SectionCardShell>
     );
   }
@@ -466,6 +502,18 @@ export function SectionEditor(props: SectionEditorProps) {
                 onChange={(e) => onUpdateItem(sectionIndex, itemIndex, 'title', e.target.value)}
               />
             </div>
+            {section.section_key === 'highlights' || item.subtitle != null ? (
+              <div>
+                <Label>Alt başlık</Label>
+                <Input
+                  className="mt-1"
+                  value={item.subtitle || ''}
+                  onChange={(e) =>
+                    onUpdateItem(sectionIndex, itemIndex, 'subtitle', e.target.value)
+                  }
+                />
+              </div>
+            ) : null}
             <div>
               <Label>Açıklama</Label>
               <Textarea
@@ -515,7 +563,6 @@ export function SectionEditor(props: SectionEditorProps) {
         onUpdateSection={onUpdateSection}
         onSave={handleSave}
         onSortOrderChange={onSortOrderChange}
-        showActiveToggle={false}
       >
         {(section.items || []).map((item, itemIndex) => (
           <div key={itemIndex} className="grid sm:grid-cols-2 gap-3">
@@ -537,6 +584,10 @@ export function SectionEditor(props: SectionEditorProps) {
             </div>
           </div>
         ))}
+        <Button type="button" variant="outline" size="sm" onClick={() => onAddItem(sectionIndex, { title: '', content: '' })}>
+          <Plus className="mr-2 h-4 w-4" />
+          Satır Ekle
+        </Button>
       </SectionCardShell>
     );
   }
@@ -590,7 +641,6 @@ export function SectionEditor(props: SectionEditorProps) {
         onUpdateSection={onUpdateSection}
         onSave={handleSave}
         onSortOrderChange={onSortOrderChange}
-        showActiveToggle={false}
       >
         <div>
           <Label>Sayfada görünen başlık</Label>

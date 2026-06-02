@@ -12,7 +12,13 @@ class AppSettings(BaseSettings):
     JWT_ALG: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    CORS_ORIGINS: str = "http://localhost:5173"
+    CORS_ORIGINS: str = (
+        "http://localhost:5173,"
+        "http://localhost:8080,"
+        "http://localhost:8081,"
+        "http://127.0.0.1:8080,"
+        "http://127.0.0.1:8081"
+    )
 
     class Config:
         env_file = ".env"

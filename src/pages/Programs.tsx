@@ -8,6 +8,7 @@ import { PageHero } from '@/components/cms/PageHero';
 import { usePageContent } from '@/hooks/usePageContent';
 import { buildProgramCategoryOptions } from '@/lib/cms/programCategories';
 import { getSection } from '@/lib/cms/pages';
+import { ApiError } from '@/lib/ApiError';
 import { programsApi } from '@/lib/api/programs';
 import {
   Program,
@@ -42,13 +43,25 @@ export default function Programs() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [activeTab, setActiveTab] = useState<ProgramCategory | 'all'>('all');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadPrograms = async () => {
       setLoading(true);
-      const data = await programsApi.getActive();
-      setPrograms(data);
-      setLoading(false);
+      setLoadError(null);
+      try {
+        const data = await programsApi.getActive();
+        setPrograms(data);
+      } catch (e) {
+        setPrograms([]);
+        setLoadError(
+          e instanceof ApiError
+            ? e.message || 'İçerik yüklenemedi.'
+            : 'İçerik yüklenemedi.'
+        );
+      } finally {
+        setLoading(false);
+      }
     };
     loadPrograms();
   }, []);
@@ -78,7 +91,9 @@ export default function Programs() {
             </TabsList>
 
             <TabsContent value={activeTab}>
-              {loading ? (
+              {loadError ? (
+                <div className="text-center py-12 text-destructive">{loadError}</div>
+              ) : loading ? (
                 <div className="text-center py-12 text-muted-foreground">Yükleniyor...</div>
               ) : filteredPrograms.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
@@ -100,20 +115,22 @@ export default function Programs() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-muted">
-        <div className="container-wide text-center">
-          <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground">
-            {cta?.title || 'Kurumunuz için Özel Program'}
-          </h2>
-          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-            {cta?.subtitle || 'FELT Dönüşüm Paketleri ile okulunuzu geleceğe hazırlayın. Size özel çözümler için iletişime geçin.'}
-          </p>
-          <Button className="mt-6" size="lg" asChild>
-            <a href="/contact">{cta?.content || 'İletişime Geçin'}</a>
-          </Button>
-        </div>
-      </section>
+      {cta ? (
+        <section className="py-16 bg-muted">
+          <div className="container-wide text-center">
+            <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground">
+              {cta.title || 'Kurumunuz için Özel Program'}
+            </h2>
+            <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+              {cta.subtitle ||
+                'FELT Dönüşüm Paketleri ile okulunuzu geleceğe hazırlayın. Size özel çözümler için iletişime geçin.'}
+            </p>
+            <Button className="mt-6" size="lg" asChild>
+              <a href="/contact">{cta.content || 'İletişime Geçin'}</a>
+            </Button>
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { PageHero } from '@/components/cms/PageHero';
 import { usePageContent } from '@/hooks/usePageContent';
 import { buildCategoryTabOptions } from '@/lib/cms/categoryTabs';
 import { getSection } from '@/lib/cms/pages';
+import { ApiError } from '@/lib/ApiError';
 import { blogApi } from '@/lib/api/blog';
 import { BlogPost, BlogCategory, blogCategoryLabels } from '@/lib/types';
 
@@ -32,13 +33,25 @@ export default function Blog() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [activeTab, setActiveTab] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadPosts = async () => {
       setLoading(true);
-      const data = await blogApi.getPublished();
-      setPosts(data);
-      setLoading(false);
+      setLoadError(null);
+      try {
+        const data = await blogApi.getPublished();
+        setPosts(data);
+      } catch (e) {
+        setPosts([]);
+        setLoadError(
+          e instanceof ApiError
+            ? e.message || 'İçerik yüklenemedi.'
+            : 'İçerik yüklenemedi.'
+        );
+      } finally {
+        setLoading(false);
+      }
     };
     loadPosts();
   }, []);
@@ -68,7 +81,9 @@ export default function Blog() {
             </TabsList>
 
             <TabsContent value={activeTab}>
-              {loading ? (
+              {loadError ? (
+                <div className="text-center py-12 text-destructive">{loadError}</div>
+              ) : loading ? (
                 <div className="text-center py-12 text-muted-foreground">Yükleniyor...</div>
               ) : filteredPosts.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
@@ -86,7 +101,7 @@ export default function Blog() {
         </div>
       </section>
 
-      {/* Newsletter CTA */}
+      {newsletter ? (
       <section className="py-16 md:py-24 bg-primary text-primary-foreground">
         <div className="container-wide max-w-3xl mx-auto text-center">
           <p className="text-sm font-medium tracking-wide text-primary-foreground/70 uppercase">
@@ -113,6 +128,7 @@ export default function Blog() {
           </form>
         </div>
       </section>
+      ) : null}
     </div>
   );
 }

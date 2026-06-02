@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { PageHero } from '@/components/cms/PageHero';
 import { usePageContent } from '@/hooks/usePageContent';
+import { SocialLinks } from '@/components/layout/SocialLinks';
+import { FELT_CONTACT_EMAIL } from '@/lib/socialLinks';
 import { getSection } from '@/lib/cms/pages';
 import { contactApi } from '@/lib/api/contact';
 import { ContactType, contactTypeLabels } from '@/lib/types';
@@ -170,35 +172,36 @@ export default function Contact() {
 
             {/* Sidebar */}
             <div className="space-y-6">
-              {/* Contact Info */}
-              <Card className="border-border">
-                <CardHeader>
-                  <CardTitle className="text-lg">İletişim Bilgileri</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <Mail className="h-5 w-5 text-primary mt-0.5" />
-                    <div>
-                      <p className="font-medium text-foreground">E-posta</p>
-                      <a
-                        href={`mailto:${emailItem?.content || 'info@felt.org'}`}
-                        className="text-sm text-muted-foreground hover:text-primary"
-                      >
-                        {emailItem?.content || 'info@felt.org'}
-                      </a>
+              {contactInfo ? (
+                <Card className="border-border">
+                  <CardHeader>
+                    <CardTitle className="text-lg">İletişim Bilgileri</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <Mail className="h-5 w-5 text-primary mt-0.5" />
+                      <div>
+                        <p className="font-medium text-foreground">E-posta</p>
+                        <a
+                          href={`mailto:${emailItem?.content || FELT_CONTACT_EMAIL}`}
+                          className="text-sm text-muted-foreground hover:text-primary"
+                        >
+                          {emailItem?.content || FELT_CONTACT_EMAIL}
+                        </a>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                    <div>
-                      <p className="font-medium text-foreground">Adres</p>
-                      <p className="text-sm text-muted-foreground">
-                        {locationItem?.content || 'İstanbul, Türkiye'}
-                      </p>
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-5 w-5 text-primary mt-0.5" />
+                      <div>
+                        <p className="font-medium text-foreground">Adres</p>
+                        <p className="text-sm text-muted-foreground">
+                          {locationItem?.content || 'İstanbul, Türkiye'}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              ) : null}
 
               {/* Newsletter */}
               <Card className="border-border bg-card shadow-sm">
@@ -238,29 +241,7 @@ export default function Contact() {
                   <CardTitle className="text-lg">Sosyal Medya</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex gap-3">
-                    <a
-                      href="#"
-                      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
-                      aria-label="Twitter"
-                    >
-                      𝕏
-                    </a>
-                    <a
-                      href="#"
-                      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
-                      aria-label="LinkedIn"
-                    >
-                      in
-                    </a>
-                    <a
-                      href="#"
-                      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
-                      aria-label="YouTube"
-                    >
-                      ▶
-                    </a>
-                  </div>
+                  <SocialLinks variant="card" />
                 </CardContent>
               </Card>
             </div>

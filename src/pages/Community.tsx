@@ -126,20 +126,22 @@ export default function Community() {
         </section>
       )}
 
-      <section className="py-16 bg-primary text-primary-foreground">
-        <div className="container-wide text-center">
-          <Users className="h-12 w-12 mx-auto mb-4 opacity-80" />
-          <h2 className="font-heading text-3xl font-bold">
-            {cta?.title || 'FELT Topluluğuna Katıl'}
-          </h2>
-          <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
-            {cta?.subtitle || 'Etkinliklere katılın ve araştırma çevrelerine dahil olun.'}
-          </p>
-          <Button size="lg" variant="secondary" className="mt-6">
-            Topluluğa Katıl
-          </Button>
-        </div>
-      </section>
+      {cta ? (
+        <section className="py-16 bg-primary text-primary-foreground">
+          <div className="container-wide text-center">
+            <Users className="h-12 w-12 mx-auto mb-4 opacity-80" />
+            <h2 className="font-heading text-3xl font-bold">
+              {cta.title || 'FELT Topluluğuna Katıl'}
+            </h2>
+            <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
+              {cta.subtitle || 'Etkinliklere katılın ve araştırma çevrelerine dahil olun.'}
+            </p>
+            <Button size="lg" variant="secondary" className="mt-6">
+              Topluluğa Katıl
+            </Button>
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

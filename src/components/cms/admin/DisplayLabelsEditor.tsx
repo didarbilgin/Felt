@@ -48,28 +48,37 @@ export function DisplayLabelsEditor({
     setLabels(next.labels);
   }, [section.id, section.items, config.pinnedKeys.join(',')]);
 
+  const commit = (nextKeys: string[], nextLabels: string[]) => {
+    setKeys(nextKeys);
+    setLabels(nextLabels);
+    onUpdateSection(
+      sectionIndex,
+      'items',
+      syncEditableLabelItems(section.items, nextKeys, nextLabels, config.pinnedKeys)
+    );
+  };
+
   const updateLabel = (index: number, value: string) => {
     const nextLabels = [...labels];
     nextLabels[index] = value;
-    setLabels(nextLabels);
+    commit(keys, nextLabels);
   };
 
   const removeRow = (index: number) => {
-    setKeys(keys.filter((_, i) => i !== index));
-    setLabels(labels.filter((_, i) => i !== index));
+    commit(
+      keys.filter((_, i) => i !== index),
+      labels.filter((_, i) => i !== index)
+    );
   };
 
   const addRow = () => {
-    setKeys([...keys, '']);
-    setLabels([...labels, '']);
+    commit([...keys, ''], [...labels, '']);
   };
 
   const save = () => {
-    const synced = syncEditableLabelItems(section.items, keys, labels, config.pinnedKeys);
-    onUpdateSection(sectionIndex, 'items', synced);
     onSave({
       ...section,
-      items: synced,
+      items: syncEditableLabelItems(section.items, keys, labels, config.pinnedKeys),
     });
   };
 

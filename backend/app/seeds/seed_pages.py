@@ -339,7 +339,7 @@ SECTIONS = [
         "section_key": "contact-info",
         "section_type": "text",
         "items": [
-            {"title": "E-posta", "content": "info@felt.org"},
+            {"title": "E-posta", "content": "drhumeyrakalafat@gmail.com"},
             {"title": "Konum", "content": "İstanbul, Türkiye"},
         ],
         "sort_order": 1,

@@ -7,15 +7,26 @@ from app.api.deps import get_current_admin, get_db
 from app.models.program import Program
 from app.schemas.program import ProgramCreate, ProgramOut, ProgramUpdate
 
-router = APIRouter(prefix="/api/admin/programs", tags=["admin:programs"])
+admin_router = APIRouter(prefix="/api/admin/programs", tags=["admin:programs"])
+public_router = APIRouter(prefix="/api/programs", tags=["programs"])
 
 
-@router.get("", response_model=list[ProgramOut])
-def list_programs(db: Session = Depends(get_db), _=Depends(get_current_admin)):
+@public_router.get("", response_model=list[ProgramOut])
+def list_public_programs(db: Session = Depends(get_db)):
+    return (
+        db.query(Program)
+        .filter(Program.status == "active")
+        .order_by(Program.created_at.desc())
+        .all()
+    )
+
+
+@admin_router.get("", response_model=list[ProgramOut])
+def list_admin_programs(db: Session = Depends(get_db), _=Depends(get_current_admin)):
     return db.query(Program).order_by(Program.created_at.desc()).all()
 
 
-@router.get("/{program_id}", response_model=ProgramOut)
+@admin_router.get("/{program_id}", response_model=ProgramOut)
 def get_program(program_id: UUID, db: Session = Depends(get_db), _=Depends(get_current_admin)):
     obj = db.query(Program).filter(Program.id == program_id).first()
     if not obj:
@@ -23,7 +34,7 @@ def get_program(program_id: UUID, db: Session = Depends(get_db), _=Depends(get_c
     return obj
 
 
-@router.post("", response_model=ProgramOut)
+@admin_router.post("", response_model=ProgramOut)
 def create_program(body: ProgramCreate, db: Session = Depends(get_db), _=Depends(get_current_admin)):
     obj = Program(**body.model_dump(mode="json"))
     db.add(obj)
@@ -32,7 +43,7 @@ def create_program(body: ProgramCreate, db: Session = Depends(get_db), _=Depends
     return obj
 
 
-@router.put("/{program_id}", response_model=ProgramOut)
+@admin_router.put("/{program_id}", response_model=ProgramOut)
 def update_program(program_id: UUID, body: ProgramUpdate, db: Session = Depends(get_db), _=Depends(get_current_admin)):
     obj = db.query(Program).filter(Program.id == program_id).first()
     if not obj:
@@ -46,7 +57,7 @@ def update_program(program_id: UUID, body: ProgramUpdate, db: Session = Depends(
     return obj
 
 
-@router.delete("/{program_id}")
+@admin_router.delete("/{program_id}")
 def delete_program(program_id: UUID, db: Session = Depends(get_db), _=Depends(get_current_admin)):
     obj = db.query(Program).filter(Program.id == program_id).first()
     if not obj:

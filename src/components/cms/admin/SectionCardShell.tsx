@@ -67,7 +67,7 @@ export function SectionCardShell({
         {canToggle && (
           <div className="flex items-center gap-2 shrink-0">
             <Label htmlFor={`active-${section.id}`} className="text-sm">
-              Aktif
+              Aktif / Pasif
             </Label>
             <Switch
               id={`active-${section.id}`}

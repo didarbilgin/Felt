@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Linkedin, Twitter, Youtube } from 'lucide-react';
 import { pagesApi } from '@/lib/cms/pages';
 import { getSection } from '@/lib/cms/pages';
+import { SocialLinks } from '@/components/layout/SocialLinks';
 
 const footerLinks = {
   platform: [
@@ -18,13 +18,6 @@ const footerLinks = {
     { label: 'İletişim', href: '/contact' },
   ],
 };
-
-const socialLinks = [
-  { icon: Twitter, href: '#', label: 'Twitter' },
-  { icon: Linkedin, href: '#', label: 'LinkedIn' },
-  { icon: Youtube, href: '#', label: 'YouTube' },
-  { icon: Mail, href: 'mailto:info@felt.org', label: 'Email' },
-];
 
 export function Footer() {
   const [brandText, setBrandText] = useState(
@@ -42,28 +35,14 @@ export function Footer() {
     <footer className="bg-primary text-primary-foreground">
       <div className="container-wide py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
           <div className="md:col-span-2">
             <Link to="/" className="inline-block">
               <span className="font-heading text-3xl font-bold">FELT</span>
             </Link>
             <p className="mt-3 text-sm text-primary-foreground/80 max-w-md">{brandText}</p>
-            {/* Social Links */}
-            <div className="flex gap-4 mt-6">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  aria-label={social.label}
-                  className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 transition-colors"
-                >
-                  <social.icon className="h-5 w-5" />
-                </a>
-              ))}
-            </div>
+            <SocialLinks variant="footer" className="mt-6" />
           </div>
 
-          {/* Platform Links */}
           <div>
             <h3 className="font-semibold mb-4">Platform</h3>
             <ul className="space-y-2">
@@ -80,7 +59,6 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Community Links */}
           <div>
             <h3 className="font-semibold mb-4">Topluluk</h3>
             <ul className="space-y-2">
@@ -98,7 +76,6 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-primary-foreground/20 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-primary-foreground/60">
             © {new Date().getFullYear()} FELT. Tüm hakları saklıdır.

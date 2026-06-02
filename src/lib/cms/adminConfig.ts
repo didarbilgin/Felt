@@ -93,6 +93,7 @@ export function getSectionEditorVariant(section: PageSection): SectionEditorVari
     return 'display-labels';
   }
   if (key === 'highlight') return 'section-heading';
+  if (key === 'highlights') return 'cards';
   if (key === 'lab-sections') return 'lab-cards';
   if (key === 'hubs' && page === 'home') return 'hubs-ecosystem';
   if (key === 'ecosystem' && page === 'home') return 'ecosystem-items';
@@ -117,6 +118,15 @@ export function shouldShowSortOrder(_section: PageSection): boolean {
   return true;
 }
 
+const SECTION_ACTIVE_TOGGLE_HIDDEN_KEYS = new Set([
+  'article-tabs',
+  'blog-tabs',
+  'event-tabs',
+  'program-tabs',
+]);
+
 export function shouldShowActiveToggle(section: PageSection): boolean {
-  return section.section_key !== 'hero' || section.page_key === 'footer';
+  if (SECTION_ACTIVE_TOGGLE_HIDDEN_KEYS.has(section.section_key)) return false;
+  if (section.section_key === 'hero' && section.page_key === 'home') return false;
+  return true;
 }

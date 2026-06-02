@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { ApiError } from '@/lib/ApiError';
 import { blogApi } from '@/lib/api/blog';
 import { BlogPost as BlogPostType, blogCategoryLabels } from '@/lib/types';
 
@@ -9,14 +10,27 @@ export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const [post, setPost] = useState<BlogPostType | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadPost = async () => {
       if (!slug) return;
       setLoading(true);
-      const data = await blogApi.getBySlug(slug);
-      setPost(data || null);
-      setLoading(false);
+      setLoadError(null);
+      try {
+        const data = await blogApi.getBySlug(slug);
+        setPost(data || null);
+        if (!data) setLoadError('İçerik bulunamadı.');
+      } catch (e) {
+        setPost(null);
+        setLoadError(
+          e instanceof ApiError
+            ? e.message || 'İçerik yüklenemedi.'
+            : 'İçerik yüklenemedi.'
+        );
+      } finally {
+        setLoading(false);
+      }
     };
     loadPost();
   }, [slug]);
@@ -36,7 +50,9 @@ export default function BlogPost() {
       <div className="section-padding">
         <div className="container-narrow text-center">
           <h1 className="text-2xl font-bold text-foreground">Yazı Bulunamadı</h1>
-          <p className="mt-2 text-muted-foreground">Bu yazı mevcut değil veya kaldırılmış olabilir.</p>
+          <p className="mt-2 text-muted-foreground">
+            {loadError || 'Bu yazı mevcut değil veya kaldırılmış olabilir.'}
+          </p>
           <Link
             to="/blog"
             className="mt-4 inline-flex items-center text-primary hover:underline"

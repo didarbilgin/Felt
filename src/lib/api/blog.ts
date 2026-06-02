@@ -1,13 +1,14 @@
 import { BlogCategory, BlogPost, CreateBlogPostData } from '@/lib/types';
 import { apiRequest } from '@/lib/api/client';
 
-const BLOG_PATH = '/api/admin/blog';
+const ADMIN_BLOG_PATH = '/api/admin/blog';
+const PUBLIC_BLOG_PATH = '/api/blog-posts';
 
 type BackendBlogPost = {
   id: string;
   title: string;
   slug: string;
-  category: BlogCategory;
+  category: BlogCategory | string;
   content: string;
   excerpt: string;
   publish_date: string;
@@ -18,7 +19,7 @@ type BackendBlogPost = {
 
 type BackendBlogPayload = {
   title?: string;
-  category?: BlogCategory;
+  category?: BlogCategory | string;
   content?: string;
   excerpt?: string;
   publish_date?: string;
@@ -29,7 +30,7 @@ const toFrontend = (item: BackendBlogPost): BlogPost => ({
   id: item.id,
   title: item.title,
   slug: item.slug,
-  category: item.category,
+  category: item.category as BlogPost['category'],
   content: item.content,
   excerpt: item.excerpt,
   publishDate: new Date(item.publish_date),
@@ -64,33 +65,42 @@ const mapToBackendPayload = (
 };
 
 export const blogApi = {
-  getAll: async (): Promise<BlogPost[]> => {
-    const data = await apiRequest<BackendBlogPost[]>(BLOG_PATH, { method: 'GET' });
+  /** Public site — published posts only (no auth). */
+  getPublished: async (): Promise<BlogPost[]> => {
+    const data = await apiRequest<BackendBlogPost[]>(PUBLIC_BLOG_PATH, { method: 'GET' });
     return data.map(toFrontend).sort(byPublishDateDesc);
   },
 
-  getByCategory: async (category: BlogCategory): Promise<BlogPost[]> => {
-    const all = await blogApi.getAll();
+  getByCategory: async (category: BlogCategory | string): Promise<BlogPost[]> => {
+    const all = await blogApi.getPublished();
     return all.filter((post) => post.category === category).sort(byPublishDateDesc);
   },
 
-  getPublished: async (): Promise<BlogPost[]> => {
-    const all = await blogApi.getAll();
-    return all.filter((post) => post.status === 'published').sort(byPublishDateDesc);
+  getBySlug: async (slug: string): Promise<BlogPost | undefined> => {
+    try {
+      const data = await apiRequest<BackendBlogPost>(
+        `${PUBLIC_BLOG_PATH}/slug/${encodeURIComponent(slug)}`,
+        { method: 'GET' }
+      );
+      return toFrontend(data);
+    } catch {
+      return undefined;
+    }
+  },
+
+  /** Admin — all posts (auth required). */
+  getAll: async (): Promise<BlogPost[]> => {
+    const data = await apiRequest<BackendBlogPost[]>(ADMIN_BLOG_PATH, { method: 'GET' });
+    return data.map(toFrontend).sort(byPublishDateDesc);
   },
 
   getById: async (id: string): Promise<BlogPost | undefined> => {
-    const data = await apiRequest<BackendBlogPost>(`${BLOG_PATH}/${id}`, { method: 'GET' });
+    const data = await apiRequest<BackendBlogPost>(`${ADMIN_BLOG_PATH}/${id}`, { method: 'GET' });
     return toFrontend(data);
   },
 
-  getBySlug: async (slug: string): Promise<BlogPost | undefined> => {
-    const all = await blogApi.getAll();
-    return all.find((post) => post.slug === slug);
-  },
-
   create: async (data: CreateBlogPostData): Promise<BlogPost> => {
-    const created = await apiRequest<BackendBlogPost>(BLOG_PATH, {
+    const created = await apiRequest<BackendBlogPost>(ADMIN_BLOG_PATH, {
       method: 'POST',
       body: JSON.stringify(mapToBackendPayload(data)),
       headers: {
@@ -105,7 +115,7 @@ export const blogApi = {
     id: string,
     data: Partial<CreateBlogPostData>,
   ): Promise<BlogPost | undefined> => {
-    const updated = await apiRequest<BackendBlogPost>(`${BLOG_PATH}/${id}`, {
+    const updated = await apiRequest<BackendBlogPost>(`${ADMIN_BLOG_PATH}/${id}`, {
       method: 'PUT',
       body: JSON.stringify(mapToBackendPayload(data)),
       headers: {
@@ -117,7 +127,7 @@ export const blogApi = {
   },
 
   delete: async (id: string): Promise<boolean> => {
-    await apiRequest<{ ok: boolean }>(`${BLOG_PATH}/${id}`, { method: 'DELETE' });
+    await apiRequest<{ ok: boolean }>(`${ADMIN_BLOG_PATH}/${id}`, { method: 'DELETE' });
     return true;
   },
 

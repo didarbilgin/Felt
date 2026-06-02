@@ -274,19 +274,29 @@ export default function Home() {
 
   useEffect(() => {
     const loadData = async () => {
-      const [article, program, posts] = await Promise.all([
+      const [articleResult, programResult, postsResult] = await Promise.allSettled([
         articlesApi.getFeatured(),
         programsApi.getFeatured(),
         blogApi.getRecent(3),
       ]);
-      setFeaturedArticle(article || null);
-      setFeaturedProgram(program || null);
-      setRecentPosts(posts);
+      if (articleResult.status === 'fulfilled') {
+        setFeaturedArticle(articleResult.value || null);
+      }
+      if (programResult.status === 'fulfilled') {
+        setFeaturedProgram(programResult.value || null);
+      }
+      if (postsResult.status === 'fulfilled') {
+        setRecentPosts(postsResult.value);
+      }
     };
     loadData();
   }, []);
 
-  const renderPlan = useMemo(() => buildHomeRenderPlan(sections), [sections]);
+  const renderPlan = useMemo(() => {
+    const plan = buildHomeRenderPlan(sections);
+    if (plan.some((block) => block.kind === 'hero')) return plan;
+    return [{ kind: 'hero' as const }, ...plan];
+  }, [sections]);
 
   const renderBlock = (block: (typeof renderPlan)[number], index: number) => {
     switch (block.kind) {
@@ -410,7 +420,7 @@ export default function Home() {
                         </Link>
                       </>
                     ) : (
-                      <p className="text-muted-foreground">Yükleniyor...</p>
+                      <p className="text-sm text-muted-foreground">Henüz öne çıkan yayın yok.</p>
                     )}
                   </CardContent>
                 </Card>
@@ -443,7 +453,7 @@ export default function Home() {
                         </Link>
                       </>
                     ) : (
-                      <p className="text-muted-foreground">Yükleniyor...</p>
+                      <p className="text-sm text-muted-foreground">Henüz öne çıkan program yok.</p>
                     )}
                   </CardContent>
                 </Card>

@@ -5,13 +5,15 @@ from app.core.config import app_settings
 from app.routes.auth import router as auth_router
 from app.routes.articles import router as articles_router
 from app.routes.articles_public import router as articles_public_router
-from app.routes.blog import router as blog_router
+from app.routes.blog import admin_router as blog_admin_router
+from app.routes.blog import public_router as blog_public_router
 from app.routes.contact import admin_router as contact_admin_router
 from app.routes.contact import router as contact_router
 from app.routes.events import admin_router as events_admin_router
 
 from app.routes.events import public_router as events_public_router
-from app.routes.programs import router as programs_router
+from app.routes.programs import admin_router as programs_admin_router
+from app.routes.programs import public_router as programs_public_router
 from app.routes.about_sections import admin_router as about_sections_admin_router
 from app.routes.about_sections import public_router as about_sections_public_router
 from app.routes.pages import admin_router as pages_admin_router
@@ -32,10 +34,12 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(articles_public_router)
 app.include_router(articles_router)
-app.include_router(programs_router)
+app.include_router(programs_public_router)
+app.include_router(programs_admin_router)
 app.include_router(events_public_router)
 app.include_router(events_admin_router)
-app.include_router(blog_router)
+app.include_router(blog_public_router)
+app.include_router(blog_admin_router)
 app.include_router(contact_router)
 app.include_router(contact_admin_router)
 app.include_router(about_sections_public_router)
