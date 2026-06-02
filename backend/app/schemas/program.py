@@ -16,6 +16,8 @@ class ProgramCreate(BaseModel):
     category: str
     target_audience: str
     description: str
+    detail_description: str | None = None
+    link: str | None = None
     duration: str
     status: ProgramStatus = ProgramStatus.draft
 
@@ -25,6 +27,8 @@ class ProgramUpdate(BaseModel):
     category: str | None = None
     target_audience: str | None = None
     description: str | None = None
+    detail_description: str | None = None
+    link: str | None = None
     duration: str | None = None
     status: ProgramStatus | None = None
 
@@ -35,6 +39,8 @@ class ProgramOut(BaseModel):
     category: str
     target_audience: str
     description: str
+    detail_description: str | None
+    link: str | None
     duration: str
     status: ProgramStatus
     created_at: datetime

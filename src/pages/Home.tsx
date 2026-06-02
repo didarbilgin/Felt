@@ -596,7 +596,7 @@ export default function Home() {
                   variant="outline"
                   className="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
                 >
-                  <Link to="/contact">İletişime Geç</Link>
+                  <Link to="/contact#contact-form">İletişime Geç</Link>
                 </Button>
               </div>
             </div>

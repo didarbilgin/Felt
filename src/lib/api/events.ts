@@ -17,6 +17,7 @@ type BackendEvent = {
   date: string;
   location: string;
   description: string;
+  detail_description?: string | null;
   link: string | null;
   status: string;
   created_at: string;
@@ -45,6 +46,7 @@ const toFrontend = (item: BackendEvent): Event => ({
   date: new Date(item.date),
   location: item.location,
   description: item.description,
+  detailDescription: item.detail_description?.trim() || undefined,
   link: item.link ?? undefined,
   status: normalizeEventStatus(item.status),
   createdAt: new Date(item.created_at),
@@ -57,6 +59,7 @@ type BackendEventPayload = {
   date: string;
   location: string;
   description: string;
+  detail_description?: string | null;
   link?: string | null;
   status: EventStatus;
 };
@@ -78,6 +81,9 @@ const mapToBackendPayload = (
 
   if (data.location !== undefined) out.location = data.location;
   if (data.description !== undefined) out.description = data.description;
+  if (data.detailDescription !== undefined) {
+    out.detail_description = data.detailDescription?.trim() || null;
+  }
 
   if (data.link !== undefined) {
     out.link = data.link?.trim() ? data.link : null;
@@ -99,6 +105,7 @@ const toBackendCreate = (
       : String(data.date),
   location: data.location,
   description: data.description,
+  detail_description: data.detailDescription?.trim() || null,
   link: data.link?.trim() ? data.link : null,
   status: data.status,
 });

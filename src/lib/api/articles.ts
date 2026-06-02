@@ -9,6 +9,7 @@ interface BackendArticle {
   title: string;
   slug: string;
   abstract: string | null;
+  detail_description?: string | null;
   content: string;
   article_type: string;
   year: number;
@@ -71,6 +72,7 @@ const mapBackendToFrontend = (article: BackendArticle): Article => ({
   coverImage: article.cover_image?.trim() || undefined,
   pdfLink: article.pdf_link?.trim() || undefined,
   abstract: article.abstract ?? undefined,
+  detailDescription: article.detail_description?.trim() || undefined,
   content: article.content,
   status: normalizeStatus(article.status),
   publishedAt: article.published_at ? toDate(article.published_at) : undefined,
@@ -81,6 +83,7 @@ const mapBackendToFrontend = (article: BackendArticle): Article => ({
 interface BackendArticlePayload {
   title: string;
   abstract?: string | null;
+  detail_description?: string | null;
   content: string;
   article_type: string;
   year: number;
@@ -97,6 +100,7 @@ const mapCreateToBackend = (data: CreateArticleData): BackendArticlePayload => (
   title: data.title,
   content: data.content?.trim() || data.abstract?.trim() || data.title,
   abstract: data.abstract?.trim() || null,
+  detail_description: data.detailDescription?.trim() || null,
   article_type: data.type,
   year: data.year,
   language: data.language,
@@ -115,6 +119,9 @@ const mapUpdateToBackend = (data: Partial<CreateArticleData>): Record<string, un
     payload.slug = slugify(data.title);
   }
   if (data.abstract !== undefined) payload.abstract = data.abstract.trim() || null;
+  if (data.detailDescription !== undefined) {
+    payload.detail_description = data.detailDescription.trim() || null;
+  }
   if (data.content !== undefined) payload.content = data.content;
   if (data.type !== undefined) payload.article_type = data.type;
   if (data.year !== undefined) payload.year = data.year;

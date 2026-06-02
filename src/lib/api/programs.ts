@@ -10,6 +10,8 @@ type BackendProgram = {
   category: ProgramCategory | string;
   target_audience: string;
   description: string;
+  detail_description?: string | null;
+  link?: string | null;
   duration: string;
   status: Program['status'];
   created_at: string;
@@ -21,6 +23,8 @@ type BackendProgramPayload = {
   category: ProgramCategory | string;
   target_audience: string;
   description: string;
+  detail_description?: string | null;
+  link?: string | null;
   duration: string;
   status: Program['status'];
 };
@@ -33,6 +37,8 @@ const mapProgram = (item: BackendProgram): Program => ({
   category: item.category as Program['category'],
   targetAudience: item.target_audience,
   description: item.description,
+  detailDescription: item.detail_description?.trim() || undefined,
+  link: item.link?.trim() || undefined,
   duration: item.duration,
   status: item.status,
   createdAt: new Date(item.created_at),
@@ -44,6 +50,10 @@ const mapToBackend = (data: CreateProgramData | Partial<CreateProgramData>): Par
   ...(data.category !== undefined && { category: data.category }),
   ...(data.targetAudience !== undefined && { target_audience: data.targetAudience }),
   ...(data.description !== undefined && { description: data.description }),
+  ...(data.detailDescription !== undefined && {
+    detail_description: data.detailDescription || null,
+  }),
+  ...(data.link !== undefined && { link: data.link || null }),
   ...(data.duration !== undefined && { duration: data.duration }),
   ...(data.status !== undefined && { status: data.status }),
 });

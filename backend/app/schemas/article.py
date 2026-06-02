@@ -15,6 +15,7 @@ class ArticleCreate(BaseModel):
     title: str
     slug: str | None = None
     abstract: str | None = None
+    detail_description: str | None = None
     content: str
     article_type: str = "article"
     year: int | None = None
@@ -33,6 +34,7 @@ class ArticleUpdate(BaseModel):
     title: str | None = None
     slug: str | None = None
     abstract: str | None = None
+    detail_description: str | None = None
     content: str | None = None
     article_type: str | None = None
     year: int | None = None
@@ -52,6 +54,7 @@ class ArticleOut(BaseModel):
     title: str
     slug: str
     abstract: str | None
+    detail_description: str | None
     content: str
     article_type: str
     year: int

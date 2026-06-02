@@ -20,6 +20,7 @@ type BlogFormState = {
   category: string;
   content: string;
   excerpt: string;
+  link: string;
   publishDate: string;
   status: BlogStatus;
 };
@@ -29,6 +30,7 @@ const emptyForm = (): BlogFormState => ({
   category: 'essay',
   content: '',
   excerpt: '',
+  link: '',
   publishDate: '',
   status: 'draft',
 });
@@ -106,6 +108,7 @@ export default function AdminBlog() {
       category: post.category,
       content: post.content,
       excerpt: post.excerpt,
+      link: post.link || '',
       publishDate: post.publishDate.toISOString().split('T')[0],
       status: post.status,
     });
@@ -214,11 +217,19 @@ export default function AdminBlog() {
               </div>
 
               <div className="grid gap-2">
-                <Label>Özet</Label>
+                <Label>Özet (kartta görünür)</Label>
                 <Textarea
                   value={form.excerpt}
                   onChange={(event) => setForm({ ...form, excerpt: event.target.value })}
                   rows={2}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Dış bağlantı</Label>
+                <Input
+                  value={form.link}
+                  onChange={(event) => setForm({ ...form, link: event.target.value })}
                 />
               </div>
 

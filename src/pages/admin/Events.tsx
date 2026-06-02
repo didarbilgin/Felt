@@ -24,6 +24,7 @@ type EventFormState = {
   date: string;
   location: string;
   description: string;
+  detailDescription: string;
   link: string;
   status: EventStatus;
 };
@@ -34,6 +35,7 @@ const emptyForm = (): EventFormState => ({
   date: '',
   location: '',
   description: '',
+  detailDescription: '',
   link: '',
   status: 'active',
 });
@@ -82,6 +84,7 @@ export default function AdminEvents() {
       date: new Date(form.date),
       location: form.location,
       description: form.description,
+      detailDescription: form.detailDescription.trim() || undefined,
       link: form.link.trim() ? form.link : undefined,
       status: form.status,
     };
@@ -113,6 +116,7 @@ export default function AdminEvents() {
       date: e.date.toISOString().split('T')[0],
       location: e.location,
       description: e.description,
+      detailDescription: e.detailDescription || '',
       link: e.link || '',
       status: e.status,
     });
@@ -210,11 +214,18 @@ export default function AdminEvents() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Açıklama</Label>
+                <Label>Kart açıklaması</Label>
                 <Textarea value={form.description} onChange={(ev) => setForm({ ...form, description: ev.target.value })} />
               </div>
               <div className="grid gap-2">
-                <Label>Link</Label>
+                <Label>Ek detay (modal)</Label>
+                <Textarea
+                  value={form.detailDescription}
+                  onChange={(ev) => setForm({ ...form, detailDescription: ev.target.value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label>Dış bağlantı</Label>
                 <Input value={form.link} onChange={(ev) => setForm({ ...form, link: ev.target.value })} />
               </div>
               <Button onClick={handleSave}>Kaydet</Button>

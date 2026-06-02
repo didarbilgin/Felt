@@ -23,6 +23,7 @@ const initialForm = {
   source: '',
   tags: '',
   abstract: '',
+  detailDescription: '',
   content: '',
   status: 'draft' as ArticleStatus,
 };
@@ -116,6 +117,7 @@ export default function AdminArticles() {
       source: article.source || '',
       tags: article.tags.join(', '),
       abstract: article.abstract || '',
+      detailDescription: article.detailDescription || '',
       content: article.content || '',
       status: article.status,
     });
@@ -236,10 +238,19 @@ export default function AdminArticles() {
               </div>
 
               <div className="grid gap-2">
-                <Label>Özet</Label>
+                <Label>Özet (kartta görünür)</Label>
                 <Textarea
                   value={form.abstract}
                   onChange={(e) => setForm({ ...form, abstract: e.target.value })}
+                  rows={4}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Ek detay (Detay modalı)</Label>
+                <Textarea
+                  value={form.detailDescription}
+                  onChange={(e) => setForm({ ...form, detailDescription: e.target.value })}
                   rows={4}
                 />
               </div>

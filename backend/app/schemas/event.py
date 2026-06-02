@@ -18,6 +18,7 @@ class EventCreate(BaseModel):
     date: datetime
     location: str
     description: str
+    detail_description: str | None = None
     link: str | None = None
     status: EventStatus = EventStatus.active
 
@@ -28,6 +29,7 @@ class EventUpdate(BaseModel):
     date: datetime | None = None
     location: str | None = None
     description: str | None = None
+    detail_description: str | None = None
     link: str | None = None
     status: EventStatus | None = None
 
@@ -39,6 +41,7 @@ class EventOut(BaseModel):
     date: datetime
     location: str
     description: str
+    detail_description: str | None
     link: str | None
     status: EventStatus
     created_at: datetime

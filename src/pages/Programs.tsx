@@ -4,16 +4,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  ApplicationFormDialog,
+  type ApplicationFormConfig,
+} from '@/components/applications/ApplicationFormDialog';
+import { ComingSoonEmpty } from '@/components/content/ComingSoonEmpty';
+import { ContentCardActions } from '@/components/content/ContentCardActions';
+import { ExtraDetailDialog } from '@/components/content/ExtraDetailDialog';
 import { PageHero } from '@/components/cms/PageHero';
 import { usePageContent } from '@/hooks/usePageContent';
 import { buildProgramCategoryOptions } from '@/lib/cms/programCategories';
 import { getSection } from '@/lib/cms/pages';
 import { ApiError } from '@/lib/ApiError';
 import { programsApi } from '@/lib/api/programs';
-import {
-  SourceActionDialog,
-  type SourceActionConfig,
-} from '@/components/applications/SourceActionDialog';
 import {
   Program,
   ProgramCategory,
@@ -49,6 +52,13 @@ export default function Programs() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailTitle, setDetailTitle] = useState('');
+  const [detailText, setDetailText] = useState('');
+
+  const [applyOpen, setApplyOpen] = useState(false);
+  const [applyConfig, setApplyConfig] = useState<ApplicationFormConfig | null>(null);
+
   useEffect(() => {
     const loadPrograms = async () => {
       setLoading(true);
@@ -74,49 +84,39 @@ export default function Programs() {
     return activeTab === 'all' || program.category === activeTab;
   });
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogConfig, setDialogConfig] = useState<SourceActionConfig | null>(null);
-  const [dialogStep, setDialogStep] = useState<'detail' | 'apply'>('detail');
+  const openDetail = (program: Program) => {
+    setDetailTitle(program.title);
+    setDetailText(program.detailDescription || '');
+    setDetailOpen(true);
+  };
 
-  const buildProgramConfig = (program: Program): SourceActionConfig => ({
-    sourceType: 'program',
-    sourceId: program.id,
-    sourceTitle: program.title,
-    detailTitle: program.title,
-    detailDescription: program.description,
-    detailMeta: [
-      { label: 'Kategori', value: categoryLabel(program.category) },
-      { label: 'Hedef kitle', value: program.targetAudience },
-      { label: 'Süre', value: program.duration },
-    ],
-    applyLabel: 'Başvur',
-    successMessage: 'Program başvurunuz alındı.',
-  });
-
-  const openProgramDialog = (program: Program, step: 'detail' | 'apply') => {
-    setDialogConfig(buildProgramConfig(program));
-    setDialogStep(step);
-    setDialogOpen(true);
+  const openApply = (program: Program) => {
+    setApplyConfig({
+      sourceType: 'program',
+      sourceId: program.id,
+      sourceTitle: program.title,
+      title: 'Başvur',
+      successMessage: 'Program başvurunuz alındı.',
+    });
+    setApplyOpen(true);
   };
 
   const openCtaApply = () => {
-    setDialogConfig({
+    setApplyConfig({
       sourceType: 'program',
       sourceTitle: cta?.title || 'Program başvurusu',
-      detailTitle: cta?.title || 'Kurumunuz için Özel Program',
-      detailDescription: cta?.subtitle || undefined,
-      applyLabel: 'Başvur',
+      title: 'Başvur',
       successMessage: 'Başvurunuz alındı.',
     });
-    setDialogStep('apply');
-    setDialogOpen(true);
+    setApplyOpen(true);
   };
+
+  const hasAnyPrograms = programs.length > 0;
 
   return (
     <div>
       <PageHero title={heroTitle} subtitle={heroSubtitle} />
 
-      {/* Content */}
       <section className="section-padding">
         <div className="container-wide">
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ProgramCategory | 'all')}>
@@ -137,6 +137,8 @@ export default function Programs() {
                 <div className="text-center py-12 text-destructive">{loadError}</div>
               ) : loading ? (
                 <div className="text-center py-12 text-muted-foreground">Yükleniyor...</div>
+              ) : !hasAnyPrograms ? (
+                <ComingSoonEmpty />
               ) : filteredPrograms.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   Bu kategoride program bulunamadı.
@@ -148,8 +150,8 @@ export default function Programs() {
                       key={program.id}
                       program={program}
                       categoryLabel={categoryLabel(program.category)}
-                      onDetail={() => openProgramDialog(program, 'detail')}
-                      onApply={() => openProgramDialog(program, 'apply')}
+                      onDetail={() => openDetail(program)}
+                      onApply={() => openApply(program)}
                     />
                   ))}
                 </div>
@@ -176,12 +178,13 @@ export default function Programs() {
         </section>
       ) : null}
 
-      <SourceActionDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        config={dialogConfig}
-        initialStep={dialogStep}
+      <ExtraDetailDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        title={detailTitle}
+        description={detailText}
       />
+      <ApplicationFormDialog open={applyOpen} onOpenChange={setApplyOpen} config={applyConfig} />
     </div>
   );
 }
@@ -198,7 +201,7 @@ function ProgramCard({
   onApply: () => void;
 }) {
   return (
-    <Card className="card-hover border-border">
+    <Card className="card-hover border-border flex flex-col">
       <CardHeader>
         <div className="flex items-center gap-2 mb-2">
           <Badge variant="secondary">{categoryDisplay}</Badge>
@@ -212,7 +215,7 @@ function ProgramCard({
         <CardTitle className="text-lg">{program.title}</CardTitle>
         <CardDescription>{program.description}</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col flex-1">
         <div className="space-y-2 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4" />
@@ -223,14 +226,15 @@ function ProgramCard({
             <span>{program.duration}</span>
           </div>
         </div>
-        <div className="flex flex-col gap-2 mt-4">
-          <Button type="button" className="w-full" variant="outline" onClick={onDetail}>
-            Detay
-          </Button>
-          <Button type="button" className="w-full" onClick={onApply}>
-            Başvur
-          </Button>
-        </div>
+        <ContentCardActions
+          className="mt-4"
+          size="default"
+          extraDetail={program.detailDescription}
+          externalLink={program.link}
+          applyLabel="Başvur"
+          onDetail={onDetail}
+          onApply={onApply}
+        />
       </CardContent>
     </Card>
   );

@@ -30,6 +30,8 @@ export default function AdminPrograms() {
     category: defaultCategory,
     targetAudience: '',
     description: '',
+    detailDescription: '',
+    link: '',
     duration: '',
     status: 'draft' as ProgramStatus,
   });
@@ -78,6 +80,8 @@ export default function AdminPrograms() {
         category: categoryOptions[0]?.value || defaultCategory,
         targetAudience: '',
         description: '',
+        detailDescription: '',
+        link: '',
         duration: '',
         status: 'draft',
       });
@@ -97,6 +101,8 @@ export default function AdminPrograms() {
       category: p.category,
       targetAudience: p.targetAudience,
       description: p.description,
+      detailDescription: p.detailDescription || '',
+      link: p.link || '',
       duration: p.duration,
       status: p.status,
     });
@@ -184,10 +190,26 @@ export default function AdminPrograms() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Açıklama</Label>
+                <Label>Kart açıklaması</Label>
                 <Textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="Sitede kartta görünen kısa açıklama"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label>Ek detay (modal)</Label>
+                <Textarea
+                  value={form.detailDescription}
+                  onChange={(e) => setForm({ ...form, detailDescription: e.target.value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label>Dış bağlantı</Label>
+                <Input
+                  value={form.link}
+                  onChange={(e) => setForm({ ...form, link: e.target.value })}
+                  placeholder="https://"
                 />
               </div>
               <div className="grid gap-2">

@@ -9,7 +9,14 @@ import { usePageContent } from '@/hooks/usePageContent';
 import { buildCategoryTabOptions } from '@/lib/cms/categoryTabs';
 import { getSection } from '@/lib/cms/pages';
 import { ApiError } from '@/lib/ApiError';
-import { NewsletterSubscribeBlock } from '@/components/applications/NewsletterSubscribeBlock';
+import { ComingSoonEmpty } from '@/components/content/ComingSoonEmpty';
+import { ContentCardActions } from '@/components/content/ContentCardActions';
+import { ExtraDetailDialog } from '@/components/content/ExtraDetailDialog';
+import {
+  ApplicationFormDialog,
+  type ApplicationFormConfig,
+} from '@/components/applications/ApplicationFormDialog';
+import { Button } from '@/components/ui/button';
 import { blogApi } from '@/lib/api/blog';
 import { BlogPost, BlogCategory, blogCategoryLabels } from '@/lib/types';
 
@@ -61,6 +68,23 @@ export default function Blog() {
     return activeTab === 'all' || post.category === activeTab;
   });
 
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailTitle, setDetailTitle] = useState('');
+  const [detailText, setDetailText] = useState('');
+  const [newsletterOpen, setNewsletterOpen] = useState(false);
+
+  const newsletterFormConfig: ApplicationFormConfig | null = newsletter
+    ? {
+        sourceType: 'newsletter',
+        sourceTitle: newsletter.title || 'Blog Bülteni',
+        title: 'Bülten Aboneliği',
+        submitLabel: 'Abone Ol',
+        messageLabel: 'Not (isteğe bağlı)',
+        successToastTitle: 'Abonelik kaydedildi',
+        successMessage: 'Bültenimize başarıyla kaydoldunuz.',
+      }
+    : null;
+
   return (
     <div>
       <PageHero title={heroTitle} subtitle={heroSubtitle} />
@@ -86,6 +110,8 @@ export default function Blog() {
                 <div className="text-center py-12 text-destructive">{loadError}</div>
               ) : loading ? (
                 <div className="text-center py-12 text-muted-foreground">Yükleniyor...</div>
+              ) : posts.length === 0 ? (
+                <ComingSoonEmpty />
               ) : filteredPosts.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   Bu kategoride yazı bulunamadı.
@@ -93,7 +119,15 @@ export default function Blog() {
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
                   {filteredPosts.map((post) => (
-                    <BlogCard key={post.id} post={post} />
+                    <BlogCard
+                      key={post.id}
+                      post={post}
+                      onDetail={() => {
+                        setDetailTitle(post.title);
+                        setDetailText(post.detailDescription || '');
+                        setDetailOpen(true);
+                      }}
+                    />
                   ))}
                 </div>
               )}
@@ -114,20 +148,36 @@ export default function Blog() {
           <p className="mt-4 text-primary-foreground/80 max-w-xl mx-auto leading-relaxed">
             {newsletter?.subtitle || 'Haftalık içgörüler ve yeni yayınlardan haberdar olun'}
           </p>
-          <div className="mt-8">
-            <NewsletterSubscribeBlock
-              variant="inverted"
-              sourceTitle={newsletter?.title || 'Blog Bülteni'}
-            />
-          </div>
+          <Button
+            type="button"
+            size="lg"
+            variant="secondary"
+            className="mt-8"
+            onClick={() => setNewsletterOpen(true)}
+          >
+            Abone Ol
+          </Button>
         </div>
       </section>
       ) : null}
+
+      <ApplicationFormDialog
+        open={newsletterOpen}
+        onOpenChange={setNewsletterOpen}
+        config={newsletterFormConfig}
+      />
+
+      <ExtraDetailDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        title={detailTitle}
+        description={detailText}
+      />
     </div>
   );
 }
 
-function BlogCard({ post }: { post: BlogPost }) {
+function BlogCard({ post, onDetail }: { post: BlogPost; onDetail: () => void }) {
   return (
     <Card className="border-border card-hover flex flex-col h-full">
       <CardHeader className="pb-3">
@@ -145,12 +195,20 @@ function BlogCard({ post }: { post: BlogPost }) {
             day: 'numeric',
           })}
         </p>
-        <Link
-          to={`/blog/${post.slug}`}
-          className="mt-4 inline-flex items-center text-sm font-medium text-primary hover:underline"
-        >
-          Devamını Oku <ArrowRight className="ml-1 h-4 w-4" />
-        </Link>
+        <div className="mt-4 space-y-2">
+          <Link
+            to={`/blog/${post.slug}`}
+            className="inline-flex items-center text-sm font-medium text-primary hover:underline"
+          >
+            Devamını Oku <ArrowRight className="ml-1 h-4 w-4" />
+          </Link>
+          <ContentCardActions
+            extraDetail={post.detailDescription}
+            externalLink={post.link}
+            canApply={false}
+            onDetail={onDetail}
+          />
+        </div>
       </CardContent>
     </Card>
   );

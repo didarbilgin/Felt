@@ -11,6 +11,8 @@ type BackendBlogPost = {
   category: BlogCategory | string;
   content: string;
   excerpt: string;
+  detail_description?: string | null;
+  link?: string | null;
   publish_date: string;
   status: BlogPost['status'];
   created_at: string;
@@ -22,6 +24,8 @@ type BackendBlogPayload = {
   category?: BlogCategory | string;
   content?: string;
   excerpt?: string;
+  detail_description?: string | null;
+  link?: string | null;
   publish_date?: string;
   status?: BlogPost['status'];
 };
@@ -33,6 +37,8 @@ const toFrontend = (item: BackendBlogPost): BlogPost => ({
   category: item.category as BlogPost['category'],
   content: item.content,
   excerpt: item.excerpt,
+  detailDescription: item.detail_description?.trim() || undefined,
+  link: item.link?.trim() || undefined,
   publishDate: new Date(item.publish_date),
   status: item.status,
   createdAt: new Date(item.created_at),
@@ -51,6 +57,10 @@ const mapToBackendPayload = (
   if (data.category !== undefined) payload.category = data.category;
   if (data.content !== undefined) payload.content = data.content;
   if (data.excerpt !== undefined) payload.excerpt = data.excerpt;
+  if (data.detailDescription !== undefined) {
+    payload.detail_description = data.detailDescription?.trim() || null;
+  }
+  if (data.link !== undefined) payload.link = data.link?.trim() || null;
 
   if (data.publishDate !== undefined) {
     payload.publish_date =

@@ -16,6 +16,8 @@ class BlogPostCreate(BaseModel):
     category: str
     content: str
     excerpt: str
+    detail_description: str | None = None
+    link: str | None = None
     publish_date: datetime
     status: BlogStatus = BlogStatus.draft
 
@@ -25,6 +27,8 @@ class BlogPostUpdate(BaseModel):
     category: str | None = None
     content: str | None = None
     excerpt: str | None = None
+    detail_description: str | None = None
+    link: str | None = None
     publish_date: datetime | None = None
     status: BlogStatus | None = None
 
@@ -36,6 +40,8 @@ class BlogPostOut(BaseModel):
     category: str
     content: str
     excerpt: str
+    detail_description: str | None
+    link: str | None
     publish_date: datetime
     status: BlogStatus
     created_at: datetime

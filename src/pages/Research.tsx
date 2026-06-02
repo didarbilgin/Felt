@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ExternalLink } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import { ComingSoonEmpty } from '@/components/content/ComingSoonEmpty';
+import { ContentCardActions } from '@/components/content/ContentCardActions';
+import { ExtraDetailDialog } from '@/components/content/ExtraDetailDialog';
+import { normalizeExternalLink } from '@/lib/contentExtra';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -68,6 +72,10 @@ export default function Research() {
     loadArticles();
   }, []);
 
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailTitle, setDetailTitle] = useState('');
+  const [detailText, setDetailText] = useState('');
+
   const filteredArticles = articles.filter((article) => {
     const matchesType = activeTab === 'all' || article.type === activeTab;
     const matchesLanguage = languageFilter === 'all' || article.language === languageFilter;
@@ -118,12 +126,23 @@ export default function Research() {
                 <div className="text-center py-12 text-destructive">{loadError}</div>
               ) : loading ? (
                 <div className="text-center py-12 text-muted-foreground">{uiLabels.loading}</div>
+              ) : articles.length === 0 ? (
+                <ComingSoonEmpty />
               ) : filteredArticles.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">{uiLabels.empty}</div>
               ) : (
                 <div className="space-y-4">
                   {filteredArticles.map((article) => (
-                    <ArticleCard key={article.id} article={article} categoryLabel={categoryLabel} />
+                    <ArticleCard
+                      key={article.id}
+                      article={article}
+                      categoryLabel={categoryLabel}
+                      onDetail={() => {
+                        setDetailTitle(article.title);
+                        setDetailText(article.detailDescription || '');
+                        setDetailOpen(true);
+                      }}
+                    />
                   ))}
                 </div>
               )}
@@ -131,6 +150,13 @@ export default function Research() {
           </Tabs>
         </div>
       </section>
+
+      <ExtraDetailDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        title={detailTitle}
+        description={detailText}
+      />
     </div>
   );
 }
@@ -138,13 +164,17 @@ export default function Research() {
 function ArticleCard({
   article,
   categoryLabel,
+  onDetail,
 }: {
   article: Article;
   categoryLabel: (slug: string) => string;
+  onDetail: () => void;
 }) {
   const linkHref = article.link?.trim();
   const doiValue = article.doi?.trim();
-  const externalHref = linkHref || (doiValue ? `https://doi.org/${doiValue}` : '');
+  const externalHref = normalizeExternalLink(
+    linkHref || (doiValue ? `https://doi.org/${doiValue}` : '')
+  );
 
   return (
     <div className="p-6 bg-card border border-border rounded-lg hover:shadow-md transition-shadow">
@@ -186,17 +216,12 @@ function ArticleCard({
             Devamını Oku
             <ArrowRight className="h-4 w-4" />
           </Link>
-          {externalHref ? (
-            <a
-              href={externalHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1 text-sm text-primary hover:underline"
-            >
-              <ExternalLink className="h-4 w-4" />
-              {doiValue && !linkHref ? 'DOI' : 'Dış Bağlantı'}
-            </a>
-          ) : null}
+          <ContentCardActions
+            extraDetail={article.detailDescription}
+            externalLink={externalHref}
+            canApply={false}
+            onDetail={onDetail}
+          />
         </div>
       </div>
     </div>

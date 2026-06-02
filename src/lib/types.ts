@@ -35,6 +35,7 @@ export interface Article {
   coverImage?: string;
   pdfLink?: string;
   abstract?: string;
+  detailDescription?: string;
   content: string;
   status: ArticleStatus;
   publishedAt?: Date;
@@ -56,6 +57,8 @@ export interface Program {
   category: ProgramCategory | string;
   targetAudience: string;
   description: string;
+  detailDescription?: string;
+  link?: string;
   duration: string;
   status: ProgramStatus;
   createdAt: Date;
@@ -78,6 +81,7 @@ export interface Event {
   date: Date;
   location: string;
   description: string;
+  detailDescription?: string;
   link?: string;
   status: EventStatus;
   createdAt: Date;
@@ -94,6 +98,8 @@ export interface BlogPost {
   category: BlogCategory;
   content: string;
   excerpt: string;
+  detailDescription?: string;
+  link?: string;
   publishDate: Date;
   status: BlogStatus;
   createdAt: Date;

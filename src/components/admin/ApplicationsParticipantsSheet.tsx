@@ -7,26 +7,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { formatApiErrorMessage } from '@/lib/api/errorMessage';
 import { applicationsApi } from '@/lib/api/applications';
 import type { Application, ApplicationSourceType, ApplicationStatus } from '@/lib/types';
-import { applicationStatusLabels } from '@/lib/types';
+import { ApplicationsListTable } from './ApplicationsListTable';
 
 type ApplicationsParticipantsSheetProps = {
   open: boolean;
@@ -87,9 +72,9 @@ export function ApplicationsParticipantsSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-4xl overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Katılımcılar / Başvurular</SheetTitle>
+          <SheetTitle>Katılımcılar</SheetTitle>
           <SheetDescription>{sourceTitle}</SheetDescription>
         </SheetHeader>
 
@@ -100,61 +85,7 @@ export function ApplicationsParticipantsSheet({
             <p className="text-sm text-muted-foreground">Henüz başvuru yok.</p>
           ) : (
             <div className="border rounded-lg overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Ad Soyad</TableHead>
-                    <TableHead>İletişim</TableHead>
-                    <TableHead>Kurum / Ünvan</TableHead>
-                    <TableHead>Tarih</TableHead>
-                    <TableHead>Durum</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {items.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium align-top">
-                        <div>{item.fullName}</div>
-                        {item.message ? (
-                          <p className="text-xs text-muted-foreground mt-1 max-w-[200px] whitespace-pre-wrap">
-                            {item.message}
-                          </p>
-                        ) : null}
-                      </TableCell>
-                      <TableCell className="align-top text-sm">
-                        <div>{item.email}</div>
-                        <div className="text-muted-foreground">{item.phone}</div>
-                      </TableCell>
-                      <TableCell className="align-top text-sm">
-                        {item.organization || '—'}
-                        {item.title ? (
-                          <div className="text-muted-foreground">{item.title}</div>
-                        ) : null}
-                      </TableCell>
-                      <TableCell className="align-top text-sm whitespace-nowrap">
-                        {item.createdAt.toLocaleString('tr-TR')}
-                      </TableCell>
-                      <TableCell className="align-top min-w-[140px]">
-                        <Select
-                          value={item.status}
-                          onValueChange={(v) => updateStatus(item.id, v as ApplicationStatus)}
-                        >
-                          <SelectTrigger className="h-8">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {Object.entries(applicationStatusLabels).map(([value, label]) => (
-                              <SelectItem key={value} value={value}>
-                                {label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <ApplicationsListTable items={items} onStatusChange={updateStatus} />
             </div>
           )}
           <p className="mt-4 text-xs text-muted-foreground">

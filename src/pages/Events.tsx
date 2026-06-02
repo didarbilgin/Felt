@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Calendar, MapPin, ExternalLink } from 'lucide-react';
+import { Calendar, MapPin } from 'lucide-react';
+import {
+  ApplicationFormDialog,
+  type ApplicationFormConfig,
+} from '@/components/applications/ApplicationFormDialog';
+import { ComingSoonEmpty } from '@/components/content/ComingSoonEmpty';
+import { ContentCardActions } from '@/components/content/ContentCardActions';
+import { ExtraDetailDialog } from '@/components/content/ExtraDetailDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,10 +16,6 @@ import { buildCategoryTabOptions } from '@/lib/cms/categoryTabs';
 import { getSection } from '@/lib/cms/pages';
 import { ApiError } from '@/lib/ApiError';
 import { eventsApi } from '@/lib/api/events';
-import {
-  SourceActionDialog,
-  type SourceActionConfig,
-} from '@/components/applications/SourceActionDialog';
 import {
   Event,
   EventType,
@@ -110,40 +113,39 @@ export default function Events() {
   const showHighlight = highlightedEvents.length > 0;
   const displayHighlightedEvents = highlightedEvents.slice(0, 3);
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogConfig, setDialogConfig] = useState<SourceActionConfig | null>(null);
-  const [dialogStep, setDialogStep] = useState<'detail' | 'apply'>('detail');
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailTitle, setDetailTitle] = useState('');
+  const [detailText, setDetailText] = useState('');
+  const [applyOpen, setApplyOpen] = useState(false);
+  const [applyConfig, setApplyConfig] = useState<ApplicationFormConfig | null>(null);
 
-  const buildEventConfig = (event: Event): SourceActionConfig => {
+  const canRegisterForEvent = (event: Event) => {
     const displayStatus = getEventDisplayStatus(event);
-    const canRegister =
+    return (
       displayStatus !== 'completed' &&
       displayStatus !== 'cancelled' &&
-      event.status !== 'archived';
+      event.status !== 'archived'
+    );
+  };
 
-    return {
+  const openDetail = (event: Event) => {
+    setDetailTitle(event.title);
+    setDetailText(event.detailDescription || '');
+    setDetailOpen(true);
+  };
+
+  const openApply = (event: Event) => {
+    setApplyConfig({
       sourceType: 'event',
       sourceId: event.id,
       sourceTitle: event.title,
-      detailTitle: event.title,
-      detailDescription: event.description,
-      detailMeta: [
-        { label: 'Tür', value: eventTypeLabels[event.type] },
-        { label: 'Tarih', value: formatEventDate(event.date) },
-        { label: 'Konum', value: event.location },
-        { label: 'Durum', value: getEventDisplayStatusLabel(event) },
-      ],
-      canApply: canRegister,
-      applyLabel: 'Kayıt Ol',
+      title: 'Kayıt Ol',
       successMessage: 'Etkinlik kaydınız alındı.',
-    };
+    });
+    setApplyOpen(true);
   };
 
-  const openEventDialog = (event: Event, step: 'detail' | 'apply') => {
-    setDialogConfig(buildEventConfig(event));
-    setDialogStep(step);
-    setDialogOpen(true);
-  };
+  const hasAnyEvents = publicEvents.length > 0;
 
   const scrollToAllEvents = () => {
     document.getElementById('etkinlik-listesi')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -214,35 +216,16 @@ export default function Events() {
                       <p className="mt-4 text-base md:text-lg text-muted-foreground leading-relaxed">
                         {event.description}
                       </p>
-                      <div className="mt-6 flex flex-wrap gap-3">
-                        <Button
-                          type="button"
-                          size="lg"
-                          variant="secondary"
-                          onClick={() => openEventDialog(event, 'detail')}
-                        >
-                          Detay
-                        </Button>
-                        {getEventDisplayStatus(event) !== 'completed' &&
-                        getEventDisplayStatus(event) !== 'cancelled' ? (
-                          <Button
-                            type="button"
-                            size="lg"
-                            className="bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-                            onClick={() => openEventDialog(event, 'apply')}
-                          >
-                            Kayıt Ol
-                          </Button>
-                        ) : null}
-                        {event.link ? (
-                          <Button asChild size="lg" variant="outline" className="border-primary-foreground/40">
-                            <a href={event.link} target="_blank" rel="noopener noreferrer">
-                              Dış bağlantı
-                              <ExternalLink className="ml-2 h-4 w-4" />
-                            </a>
-                          </Button>
-                        ) : null}
-                      </div>
+                      <ContentCardActions
+                        className="mt-6"
+                        size="lg"
+                        extraDetail={event.detailDescription}
+                        externalLink={event.link}
+                        applyLabel="Kayıt Ol"
+                        canApply={canRegisterForEvent(event)}
+                        onDetail={() => openDetail(event)}
+                        onApply={() => openApply(event)}
+                      />
                     </div>
                   </article>
                 ))}
@@ -288,6 +271,8 @@ export default function Events() {
                       <div className="text-center py-12 text-destructive">{loadError}</div>
                     ) : loading ? (
                       <div className="text-center py-12 text-muted-foreground">Yükleniyor...</div>
+                    ) : !hasAnyEvents ? (
+                      <ComingSoonEmpty />
                     ) : filteredEvents.length === 0 ? (
                       <div className="text-center py-12 text-muted-foreground">
                         Bu kategoride etkinlik bulunamadı.
@@ -298,8 +283,9 @@ export default function Events() {
                           <EventCard
                             key={event.id}
                             event={event}
-                            onDetail={() => openEventDialog(event, 'detail')}
-                            onApply={() => openEventDialog(event, 'apply')}
+                            onDetail={() => openDetail(event)}
+                            onApply={() => openApply(event)}
+                            canRegister={canRegisterForEvent(event)}
                           />
                         ))}
                       </div>
@@ -312,12 +298,13 @@ export default function Events() {
         </section>
       </div>
 
-      <SourceActionDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        config={dialogConfig}
-        initialStep={dialogStep}
+      <ExtraDetailDialog
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        title={detailTitle}
+        description={detailText}
       />
+      <ApplicationFormDialog open={applyOpen} onOpenChange={setApplyOpen} config={applyConfig} />
     </div>
   );
 }
@@ -326,10 +313,12 @@ function EventCard({
   event,
   onDetail,
   onApply,
+  canRegister,
 }: {
   event: Event;
   onDetail: () => void;
   onApply: () => void;
+  canRegister: boolean;
 }) {
   const displayStatus = getEventDisplayStatus(event);
   const displayLabel = getEventDisplayStatusLabel(event);
@@ -372,27 +361,15 @@ function EventCard({
           {event.title}
         </h3>
         <p className="mt-3 text-base text-muted-foreground leading-relaxed">{event.description}</p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Button type="button" size="sm" variant="outline" onClick={onDetail}>
-            Detay
-          </Button>
-          {!isDimmed ? (
-            <Button type="button" size="sm" onClick={onApply}>
-              Kayıt Ol
-            </Button>
-          ) : null}
-          {event.link ? (
-            <a
-              href={event.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline px-2 py-1"
-            >
-              <ExternalLink className="h-4 w-4" />
-              Dış bağlantı
-            </a>
-          ) : null}
-        </div>
+        <ContentCardActions
+          className="mt-4"
+          extraDetail={event.detailDescription}
+          externalLink={event.link}
+          applyLabel="Kayıt Ol"
+          canApply={canRegister && !isDimmed}
+          onDetail={onDetail}
+          onApply={onApply}
+        />
       </div>
     </article>
   );

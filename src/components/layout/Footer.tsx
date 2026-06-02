@@ -15,7 +15,7 @@ const footerLinks = {
     { label: 'Etkinlikler', href: '/events' },
     { label: 'Topluluk', href: '/community' },
     { label: 'Blog', href: '/blog' },
-    { label: 'İletişim', href: '/contact' },
+    { label: 'İletişim', href: '/contact#contact-form' },
   ],
 };
 

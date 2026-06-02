@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Mail, MapPin, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,21 @@ export default function Contact() {
 
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const scrollToForm = () => {
+      const el = document.getElementById('contact-form');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+
+    if (window.location.hash === '#contact-form') {
+      requestAnimationFrame(scrollToForm);
+    }
+  }, []);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -109,7 +124,7 @@ export default function Contact() {
         <div className="container-wide">
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Contact Form */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 scroll-mt-24" id="contact-form">
               <Card className="border-border">
                 <CardHeader>
                   <CardTitle>Mesajınızı Paylaşın</CardTitle>
@@ -162,7 +177,6 @@ export default function Contact() {
                           onChange={(e) =>
                             setFormData({ ...formData, organization: e.target.value })
                           }
-                          placeholder="İsteğe bağlı"
                         />
                       </div>
                     </div>
@@ -172,7 +186,6 @@ export default function Contact() {
                         id="title"
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        placeholder="İsteğe bağlı"
                       />
                     </div>
                     <div className="space-y-2">

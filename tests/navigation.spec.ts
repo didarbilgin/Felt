@@ -11,7 +11,9 @@ test.describe('Desktop navigation', () => {
   for (const item of NAV_ROUTES) {
     test(`nav link navigates to ${item.href}`, async ({ page }) => {
       await page.locator('header nav').getByRole('link', { name: item.label }).click();
-      await expect(page).toHaveURL(new RegExp(`${item.href.replace('/', '\\/')}$`));
+      await expect(
+        page
+      ).toHaveURL(new RegExp(`${item.href.replace('/', '\\/')}(#contact-form)?$`));
       await expect(page.locator('main').getByRole('heading').first()).toBeVisible();
     });
   }
@@ -39,7 +41,7 @@ test.describe('Mobile navigation', () => {
     await expect(mobileNav.getByRole('link', { name: 'İletişim' })).toBeVisible();
 
     await mobileNav.getByRole('link', { name: 'İletişim' }).click();
-    await expect(page).toHaveURL(/\/contact$/);
+    await expect(page).toHaveURL(/\/contact(#contact-form)?$/);
     await expect(page.getByRole('button', { name: 'Menüyü aç' })).toBeVisible();
   });
 

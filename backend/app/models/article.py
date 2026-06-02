@@ -16,6 +16,7 @@ class Article(Base):
     slug: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
 
     abstract: Mapped[str | None] = mapped_column(Text, nullable=True)
+    detail_description: Mapped[str | None] = mapped_column(Text, nullable=True)
     content: Mapped[str] = mapped_column(Text, nullable=False)
 
     article_type: Mapped[str] = mapped_column(String(50), nullable=False, server_default="article")
