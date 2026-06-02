@@ -1,15 +1,57 @@
-[Felt_README.md](https://github.com/user-attachments/files/28506971/Felt_README.md)
+
 # Felt
 
-Felt is a modern research and innovation platform website built with React, TypeScript, Vite, Tailwind CSS, and shadcn/ui.
+**Building ideas that deserve to exist.**
 
-## Overview
+Felt is a research-driven innovation platform focused on exploring emerging technologies, long-term opportunities, and meaningful digital products. The platform serves as the public face of the Felt initiative, presenting research areas, strategic priorities, roadmap planning, and organizational vision through a modern web experience.
 
-Felt presents research initiatives, strategic vision, roadmap planning, manifesto content, and organizational information through a modern and responsive web experience.
+---
+
+## Vision
+
+Felt exists to investigate, validate, and develop ideas that can create meaningful impact.
+
+Rather than focusing solely on short-term products, Felt emphasizes:
+
+- Research-first thinking
+- Long-term technological exploration
+- Human-centered innovation
+- Strategic product development
+- Sustainable digital ecosystems
+
+---
+
+## Platform Overview
+
+The website is designed as a modern research and innovation portal featuring:
+
+### Home
+Landing experience introducing the Felt initiative.
+
+### About
+Overview of the organization's purpose, philosophy, and operating principles.
+
+### Manifesto
+Core beliefs and guiding principles that shape decision-making.
+
+### Research Areas
+Exploration of strategic focus areas and emerging technologies.
+
+### Strategic Roadmap
+Long-term planning and future objectives.
+
+### Contact
+Communication and collaboration channels.
+
+### Admin Panel
+Internal content management and administration interface.
+
+---
 
 ## Technology Stack
 
 ### Frontend
+
 - React
 - TypeScript
 - Vite
@@ -17,54 +59,56 @@ Felt presents research initiatives, strategic vision, roadmap planning, manifest
 - shadcn/ui
 - React Router
 
-### Infrastructure
-- Nginx
+### Deployment
+
 - Ubuntu Linux
-- SSL (Certbot)
+- Nginx
+- SSL via Certbot
+- GitHub
 - Domain: felt.blog
 
-## Features
+---
 
-- Responsive UI
-- Modern landing page
-- Research showcase
-- Strategic roadmap
-- About section
-- Contact section
-- Admin authentication interface
-- Production-ready deployment
+## Project Structure
 
-## Development
+```text
+src/
+├── assets/
+├── components/
+├── hooks/
+├── layouts/
+├── lib/
+├── pages/
+├── services/
+├── types/
+└── App.tsx
+```
 
-Install dependencies:
+---
+
+## Local Development
 
 ```bash
 npm install
-```
-
-Run locally:
-
-```bash
 npm run dev
 ```
 
-Build:
+## Production Build
 
 ```bash
 npm run build
-```
-
-Preview:
-
-```bash
 npm run preview
 ```
 
-## Deployment
+---
 
-Deploy the generated `dist` folder behind Nginx.
+## Production Deployment
 
-Example:
+```bash
+/var/www/felt/dist
+```
+
+Example Nginx configuration:
 
 ```nginx
 server {
@@ -80,6 +124,36 @@ server {
 }
 ```
 
+Enable SSL:
+
+```bash
+sudo certbot --nginx -d felt.blog -d www.felt.blog
+```
+
+---
+
+## Design Principles
+
+- Simplicity over complexity
+- Clarity over decoration
+- Research before execution
+- Long-term thinking
+- Consistent visual language
+- Accessibility and responsiveness
+
+---
+
+## Roadmap
+
+- Content management system
+- Research publication workflows
+- Newsletter infrastructure
+- Analytics dashboard
+- Multi-language support
+- Collaboration tools
+
+---
+
 ## License
 
-Private project.
+Private project. All rights reserved.
