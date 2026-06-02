@@ -1,10 +1,13 @@
+from pathlib import Path
 from pydantic_settings import BaseSettings
+
+ROOT_DIR = Path(__file__).resolve().parents[3]
 
 class DBSettings(BaseSettings):
     DATABASE_URL: str
 
     class Config:
-        env_file = ".env"
+        env_file = ROOT_DIR / ".env"
         extra = "ignore"
 
 class AppSettings(BaseSettings):
@@ -21,7 +24,7 @@ class AppSettings(BaseSettings):
     )
 
     class Config:
-        env_file = ".env"
+        env_file = ROOT_DIR / ".env"
         extra = "ignore"
 
 db_settings = DBSettings()

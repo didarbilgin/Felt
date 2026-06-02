@@ -18,6 +18,8 @@ from app.routes.about_sections import admin_router as about_sections_admin_route
 from app.routes.about_sections import public_router as about_sections_public_router
 from app.routes.pages import admin_router as pages_admin_router
 from app.routes.pages import public_router as pages_public_router
+from app.routes.applications import admin_router as applications_admin_router
+from app.routes.applications import public_router as applications_public_router
 
 app = FastAPI(title="FELT API")
 
@@ -46,6 +48,8 @@ app.include_router(about_sections_public_router)
 app.include_router(about_sections_admin_router)
 app.include_router(pages_public_router)
 app.include_router(pages_admin_router)
+app.include_router(applications_public_router)
+app.include_router(applications_admin_router)
 
 @app.get("/health")
 def health():

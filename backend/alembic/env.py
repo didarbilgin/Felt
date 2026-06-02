@@ -16,7 +16,11 @@ from app.models.newsletter_subscription import NewsletterSubscription
 from app.models.program import Program
 from app.models.about_section import AboutSection
 from app.models.page import Page, PageSection
+from app.models.application import Application
+from app.core.config import db_settings
+
 config = context.config
+config.set_main_option("sqlalchemy.url", db_settings.DATABASE_URL)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
