@@ -1,73 +1,85 @@
-# Welcome to your Lovable project
+[Felt_README.md](https://github.com/user-attachments/files/28506971/Felt_README.md)
+# Felt
 
-## Project info
+Felt is a modern research and innovation platform website built with React, TypeScript, Vite, Tailwind CSS, and shadcn/ui.
 
-**URL**: https://lovable.dev/projects/cb9d63c5-5928-4079-9ead-36cb48bd8e13
+## Overview
 
-## How can I edit this code?
+Felt presents research initiatives, strategic vision, roadmap planning, manifesto content, and organizational information through a modern and responsive web experience.
 
-There are several ways of editing your application.
+## Technology Stack
 
-**Use Lovable**
+### Frontend
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
+- React Router
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/cb9d63c5-5928-4079-9ead-36cb48bd8e13) and start prompting.
+### Infrastructure
+- Nginx
+- Ubuntu Linux
+- SSL (Certbot)
+- Domain: felt.blog
 
-Changes made via Lovable will be committed automatically to this repo.
+## Features
 
-**Use your preferred IDE**
+- Responsive UI
+- Modern landing page
+- Research showcase
+- Strategic roadmap
+- About section
+- Contact section
+- Admin authentication interface
+- Production-ready deployment
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Development
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Install dependencies:
 
-Follow these steps:
+```bash
+npm install
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Run locally:
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Build:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+npm run build
+```
 
-**Use GitHub Codespaces**
+Preview:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+npm run preview
+```
 
-## What technologies are used for this project?
+## Deployment
 
-This project is built with:
+Deploy the generated `dist` folder behind Nginx.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Example:
 
-## How can I deploy this project?
+```nginx
+server {
+    listen 80;
+    server_name felt.blog www.felt.blog;
 
-Simply open [Lovable](https://lovable.dev/projects/cb9d63c5-5928-4079-9ead-36cb48bd8e13) and click on Share -> Publish.
+    root /var/www/felt/dist;
+    index index.html;
 
-## Can I connect a custom domain to my Lovable project?
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
 
-Yes, you can!
+## License
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Private project.
