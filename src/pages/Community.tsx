@@ -1,8 +1,13 @@
+import { useState } from 'react';
 import { Users, BookOpen, Lightbulb, MessageCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PageHero } from '@/components/cms/PageHero';
 import { usePageContent } from '@/hooks/usePageContent';
+import {
+  SourceActionDialog,
+  type SourceActionConfig,
+} from '@/components/applications/SourceActionDialog';
 import { getItemBenefits, getSection } from '@/lib/cms/pages';
 
 const defaultGroups = [
@@ -35,6 +40,10 @@ export default function Community() {
   const researchCircles = getSection(sections, 'research-circles');
   const cta = getSection(sections, 'cta');
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogConfig, setDialogConfig] = useState<SourceActionConfig | null>(null);
+  const [dialogStep, setDialogStep] = useState<'detail' | 'apply'>('apply');
+
   const membershipTypes =
     contributorTypes?.items?.map((item) => ({
       title: item.title || '',
@@ -48,6 +57,23 @@ export default function Community() {
       title: item.title || '',
       description: item.content || '',
     })) || defaultGroups;
+
+  const openCommunity = (
+    title: string,
+    description: string,
+    step: 'detail' | 'apply' = 'apply'
+  ) => {
+    setDialogConfig({
+      sourceType: 'community',
+      sourceTitle: title,
+      detailTitle: title,
+      detailDescription: description,
+      applyLabel: 'Katıl',
+      successMessage: 'Topluluk başvurunuz alındı.',
+    });
+    setDialogStep(step);
+    setDialogOpen(true);
+  };
 
   return (
     <div>
@@ -67,23 +93,21 @@ export default function Community() {
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {membershipTypes.map((type) => (
-                  <Card key={type.title} className="border-border card-hover">
+                  <Card key={type.title} className="border-border card-hover flex flex-col">
                     <CardHeader>
                       <CardTitle className="text-lg">{type.title}</CardTitle>
                       <CardDescription>{type.description}</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-2">
-                        {type.benefits.map((benefit) => (
-                          <li
-                            key={benefit}
-                            className="flex items-start gap-2 text-sm text-muted-foreground"
-                          >
-                            <span className="text-primary">•</span>
-                            {benefit}
-                          </li>
-                        ))}
-                      </ul>
+                    <CardContent className="mt-auto">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => openCommunity(type.title, type.description, 'apply')}
+                      >
+                        Katıl
+                      </Button>
                     </CardContent>
                   </Card>
                 ))}
@@ -106,7 +130,7 @@ export default function Community() {
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {communityGroups.map((group) => (
-                <Card key={group.title} className="border-border card-hover text-center">
+                <Card key={group.title} className="border-border card-hover text-center flex flex-col">
                   <CardHeader>
                     <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-4">
                       <group.icon className="h-7 w-7 text-primary" />
@@ -114,8 +138,21 @@ export default function Community() {
                     <CardTitle className="text-lg">{group.title}</CardTitle>
                     <CardDescription>{group.description}</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <Button variant="outline" size="sm">
+                  <CardContent className="mt-auto">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openCommunity(group.title, group.description, 'detail')}
+                    >
+                      Detay
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="ml-2"
+                      onClick={() => openCommunity(group.title, group.description, 'apply')}
+                    >
                       Katıl
                     </Button>
                   </CardContent>
@@ -136,12 +173,30 @@ export default function Community() {
             <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
               {cta.subtitle || 'Etkinliklere katılın ve araştırma çevrelerine dahil olun.'}
             </p>
-            <Button size="lg" variant="secondary" className="mt-6">
+            <Button
+              size="lg"
+              variant="secondary"
+              className="mt-6"
+              onClick={() =>
+                openCommunity(
+                  cta.title || 'FELT Topluluğu',
+                  cta.subtitle || '',
+                  'apply'
+                )
+              }
+            >
               Topluluğa Katıl
             </Button>
           </div>
         </section>
       ) : null}
+
+      <SourceActionDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        config={dialogConfig}
+        initialStep={dialogStep}
+      />
     </div>
   );
 }

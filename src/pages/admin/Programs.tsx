@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Users } from 'lucide-react';
+import { ApplicationsParticipantsSheet } from '@/components/admin/ApplicationsParticipantsSheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -22,6 +23,8 @@ export default function AdminPrograms() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Program | null>(null);
+  const [participantsOpen, setParticipantsOpen] = useState(false);
+  const [participantsProgram, setParticipantsProgram] = useState<Program | null>(null);
   const [form, setForm] = useState({
     title: '',
     category: defaultCategory,
@@ -218,7 +221,7 @@ export default function AdminPrograms() {
               <TableHead>Kategori</TableHead>
               <TableHead>Hedef Kitle</TableHead>
               <TableHead>Durum</TableHead>
-              <TableHead className="w-24"></TableHead>
+              <TableHead className="w-36"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -236,6 +239,17 @@ export default function AdminPrograms() {
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="Katılımcılar"
+                      onClick={() => {
+                        setParticipantsProgram(p);
+                        setParticipantsOpen(true);
+                      }}
+                    >
+                      <Users className="h-4 w-4" />
+                    </Button>
                     <Button size="icon" variant="ghost" onClick={() => handleEdit(p)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -249,6 +263,14 @@ export default function AdminPrograms() {
           </TableBody>
         </Table>
       </div>
+
+      <ApplicationsParticipantsSheet
+        open={participantsOpen}
+        onOpenChange={setParticipantsOpen}
+        sourceType="program"
+        sourceId={participantsProgram?.id}
+        sourceTitle={participantsProgram?.title || ''}
+      />
     </div>
   );
 }

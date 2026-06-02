@@ -24,6 +24,7 @@ import AdminArticles from "@/pages/admin/Articles";
 import AdminPrograms from "@/pages/admin/Programs";
 import AdminEvents from "@/pages/admin/Events";
 import AdminBlog from "@/pages/admin/BlogAdmin";
+import AdminApplications from "@/pages/admin/AdminApplications";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ const App = () => (
             <Route path="about" element={<Navigate to="/admin/pages?page=about" replace />} />
             <Route path="pages" element={<AdminPages />} />
             <Route path="contact-messages" element={<AdminContactMessages />} />
+            <Route path="applications" element={<AdminApplications />} />
             <Route index element={<AdminDashboard />} />
             <Route path="articles" element={<AdminArticles />} />
             <Route path="programs" element={<AdminPrograms />} />

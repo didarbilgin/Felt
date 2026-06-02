@@ -10,6 +10,10 @@ import { getSection } from '@/lib/cms/pages';
 import { ApiError } from '@/lib/ApiError';
 import { eventsApi } from '@/lib/api/events';
 import {
+  SourceActionDialog,
+  type SourceActionConfig,
+} from '@/components/applications/SourceActionDialog';
+import {
   Event,
   EventType,
   eventTypeLabels,
@@ -106,6 +110,41 @@ export default function Events() {
   const showHighlight = highlightedEvents.length > 0;
   const displayHighlightedEvents = highlightedEvents.slice(0, 3);
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogConfig, setDialogConfig] = useState<SourceActionConfig | null>(null);
+  const [dialogStep, setDialogStep] = useState<'detail' | 'apply'>('detail');
+
+  const buildEventConfig = (event: Event): SourceActionConfig => {
+    const displayStatus = getEventDisplayStatus(event);
+    const canRegister =
+      displayStatus !== 'completed' &&
+      displayStatus !== 'cancelled' &&
+      event.status !== 'archived';
+
+    return {
+      sourceType: 'event',
+      sourceId: event.id,
+      sourceTitle: event.title,
+      detailTitle: event.title,
+      detailDescription: event.description,
+      detailMeta: [
+        { label: 'Tür', value: eventTypeLabels[event.type] },
+        { label: 'Tarih', value: formatEventDate(event.date) },
+        { label: 'Konum', value: event.location },
+        { label: 'Durum', value: getEventDisplayStatusLabel(event) },
+      ],
+      canApply: canRegister,
+      applyLabel: 'Kayıt Ol',
+      successMessage: 'Etkinlik kaydınız alındı.',
+    };
+  };
+
+  const openEventDialog = (event: Event, step: 'detail' | 'apply') => {
+    setDialogConfig(buildEventConfig(event));
+    setDialogStep(step);
+    setDialogOpen(true);
+  };
+
   const scrollToAllEvents = () => {
     document.getElementById('etkinlik-listesi')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -175,14 +214,35 @@ export default function Events() {
                       <p className="mt-4 text-base md:text-lg text-muted-foreground leading-relaxed">
                         {event.description}
                       </p>
-                      {event.link && (
-                        <Button asChild size="lg" className="mt-6 w-fit">
-                          <a href={event.link} target="_blank" rel="noopener noreferrer">
-                            Detaylar
-                            <ExternalLink className="ml-2 h-4 w-4" />
-                          </a>
+                      <div className="mt-6 flex flex-wrap gap-3">
+                        <Button
+                          type="button"
+                          size="lg"
+                          variant="secondary"
+                          onClick={() => openEventDialog(event, 'detail')}
+                        >
+                          Detay
                         </Button>
-                      )}
+                        {getEventDisplayStatus(event) !== 'completed' &&
+                        getEventDisplayStatus(event) !== 'cancelled' ? (
+                          <Button
+                            type="button"
+                            size="lg"
+                            className="bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+                            onClick={() => openEventDialog(event, 'apply')}
+                          >
+                            Kayıt Ol
+                          </Button>
+                        ) : null}
+                        {event.link ? (
+                          <Button asChild size="lg" variant="outline" className="border-primary-foreground/40">
+                            <a href={event.link} target="_blank" rel="noopener noreferrer">
+                              Dış bağlantı
+                              <ExternalLink className="ml-2 h-4 w-4" />
+                            </a>
+                          </Button>
+                        ) : null}
+                      </div>
                     </div>
                   </article>
                 ))}
@@ -235,7 +295,12 @@ export default function Events() {
                     ) : (
                       <div className="flex flex-col gap-5 md:gap-6">
                         {filteredEvents.map((event) => (
-                          <EventCard key={event.id} event={event} />
+                          <EventCard
+                            key={event.id}
+                            event={event}
+                            onDetail={() => openEventDialog(event, 'detail')}
+                            onApply={() => openEventDialog(event, 'apply')}
+                          />
                         ))}
                       </div>
                     )}
@@ -246,11 +311,26 @@ export default function Events() {
           </div>
         </section>
       </div>
+
+      <SourceActionDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        config={dialogConfig}
+        initialStep={dialogStep}
+      />
     </div>
   );
 }
 
-function EventCard({ event }: { event: Event }) {
+function EventCard({
+  event,
+  onDetail,
+  onApply,
+}: {
+  event: Event;
+  onDetail: () => void;
+  onApply: () => void;
+}) {
   const displayStatus = getEventDisplayStatus(event);
   const displayLabel = getEventDisplayStatusLabel(event);
   const isDimmed = displayStatus === 'completed' || displayStatus === 'cancelled';
@@ -292,17 +372,27 @@ function EventCard({ event }: { event: Event }) {
           {event.title}
         </h3>
         <p className="mt-3 text-base text-muted-foreground leading-relaxed">{event.description}</p>
-        {event.link && (
-          <a
-            href={event.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-          >
-            <ExternalLink className="h-4 w-4" />
-            Detaylar
-          </a>
-        )}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button type="button" size="sm" variant="outline" onClick={onDetail}>
+            Detay
+          </Button>
+          {!isDimmed ? (
+            <Button type="button" size="sm" onClick={onApply}>
+              Kayıt Ol
+            </Button>
+          ) : null}
+          {event.link ? (
+            <a
+              href={event.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline px-2 py-1"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Dış bağlantı
+            </a>
+          ) : null}
+        </div>
       </div>
     </article>
   );

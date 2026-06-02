@@ -244,3 +244,57 @@ export function getEventDisplayStatus(event: Event, now: Date = new Date()): Eve
 export function getEventDisplayStatusLabel(event: Event, now?: Date): string {
   return eventDisplayStatusLabels[getEventDisplayStatus(event, now)];
 }
+
+// Application / registration (unified intake)
+export type ApplicationSourceType =
+  | 'program'
+  | 'event'
+  | 'newsletter'
+  | 'community'
+  | 'blog'
+  | 'contact';
+
+export type ApplicationStatus = 'new' | 'reviewed' | 'contacted' | 'rejected';
+
+export interface Application {
+  id: string;
+  sourceType: ApplicationSourceType;
+  sourceId: string | null;
+  sourceTitle: string | null;
+  fullName: string;
+  email: string;
+  phone: string;
+  organization: string | null;
+  title: string | null;
+  message: string | null;
+  status: ApplicationStatus;
+  createdAt: Date;
+}
+
+export interface ApplicationCreatePayload {
+  sourceType: ApplicationSourceType;
+  sourceId?: string | null;
+  sourceTitle?: string | null;
+  fullName: string;
+  email: string;
+  phone: string;
+  organization?: string | null;
+  title?: string | null;
+  message?: string | null;
+}
+
+export const applicationSourceTypeLabels: Record<ApplicationSourceType, string> = {
+  program: 'Program',
+  event: 'Etkinlik',
+  newsletter: 'Bülten',
+  community: 'Topluluk',
+  blog: 'Blog',
+  contact: 'İletişim',
+};
+
+export const applicationStatusLabels: Record<ApplicationStatus, string> = {
+  new: 'Yeni',
+  reviewed: 'İncelendi',
+  contacted: 'İletişime geçildi',
+  rejected: 'Reddedildi',
+};

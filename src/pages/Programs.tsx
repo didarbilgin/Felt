@@ -11,6 +11,10 @@ import { getSection } from '@/lib/cms/pages';
 import { ApiError } from '@/lib/ApiError';
 import { programsApi } from '@/lib/api/programs';
 import {
+  SourceActionDialog,
+  type SourceActionConfig,
+} from '@/components/applications/SourceActionDialog';
+import {
   Program,
   ProgramCategory,
   programCategoryLabels,
@@ -70,6 +74,44 @@ export default function Programs() {
     return activeTab === 'all' || program.category === activeTab;
   });
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogConfig, setDialogConfig] = useState<SourceActionConfig | null>(null);
+  const [dialogStep, setDialogStep] = useState<'detail' | 'apply'>('detail');
+
+  const buildProgramConfig = (program: Program): SourceActionConfig => ({
+    sourceType: 'program',
+    sourceId: program.id,
+    sourceTitle: program.title,
+    detailTitle: program.title,
+    detailDescription: program.description,
+    detailMeta: [
+      { label: 'Kategori', value: categoryLabel(program.category) },
+      { label: 'Hedef kitle', value: program.targetAudience },
+      { label: 'Süre', value: program.duration },
+    ],
+    applyLabel: 'Başvur',
+    successMessage: 'Program başvurunuz alındı.',
+  });
+
+  const openProgramDialog = (program: Program, step: 'detail' | 'apply') => {
+    setDialogConfig(buildProgramConfig(program));
+    setDialogStep(step);
+    setDialogOpen(true);
+  };
+
+  const openCtaApply = () => {
+    setDialogConfig({
+      sourceType: 'program',
+      sourceTitle: cta?.title || 'Program başvurusu',
+      detailTitle: cta?.title || 'Kurumunuz için Özel Program',
+      detailDescription: cta?.subtitle || undefined,
+      applyLabel: 'Başvur',
+      successMessage: 'Başvurunuz alındı.',
+    });
+    setDialogStep('apply');
+    setDialogOpen(true);
+  };
+
   return (
     <div>
       <PageHero title={heroTitle} subtitle={heroSubtitle} />
@@ -106,6 +148,8 @@ export default function Programs() {
                       key={program.id}
                       program={program}
                       categoryLabel={categoryLabel(program.category)}
+                      onDetail={() => openProgramDialog(program, 'detail')}
+                      onApply={() => openProgramDialog(program, 'apply')}
                     />
                   ))}
                 </div>
@@ -125,12 +169,19 @@ export default function Programs() {
               {cta.subtitle ||
                 'FELT Dönüşüm Paketleri ile okulunuzu geleceğe hazırlayın. Size özel çözümler için iletişime geçin.'}
             </p>
-            <Button className="mt-6" size="lg" asChild>
-              <a href="/contact">{cta.content || 'İletişime Geçin'}</a>
+            <Button className="mt-6" size="lg" onClick={openCtaApply}>
+              {cta.content || 'Başvur'}
             </Button>
           </div>
         </section>
       ) : null}
+
+      <SourceActionDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        config={dialogConfig}
+        initialStep={dialogStep}
+      />
     </div>
   );
 }
@@ -138,9 +189,13 @@ export default function Programs() {
 function ProgramCard({
   program,
   categoryLabel: categoryDisplay,
+  onDetail,
+  onApply,
 }: {
   program: Program;
   categoryLabel: string;
+  onDetail: () => void;
+  onApply: () => void;
 }) {
   return (
     <Card className="card-hover border-border">
@@ -168,9 +223,14 @@ function ProgramCard({
             <span>{program.duration}</span>
           </div>
         </div>
-        <Button className="w-full mt-4" variant="outline">
-          Detayları İncele
-        </Button>
+        <div className="flex flex-col gap-2 mt-4">
+          <Button type="button" className="w-full" variant="outline" onClick={onDetail}>
+            Detay
+          </Button>
+          <Button type="button" className="w-full" onClick={onApply}>
+            Başvur
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

@@ -10,6 +10,7 @@ import {
   Menu,
   Layout,
   Mail,
+  ClipboardList,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { authApi } from '@/lib/api/auth';
@@ -25,6 +26,7 @@ const sidebarItems = [
   { label: 'Blog', href: '/admin/blog', icon: PenTool },
   { label: 'Sayfaları Düzenle', href: '/admin/pages', icon: Layout },
   { label: 'İletişim Mesajları', href: '/admin/contact-messages', icon: Mail },
+  { label: 'Başvurular', href: '/admin/applications', icon: ClipboardList },
 ];
 
 export function AdminLayout() {

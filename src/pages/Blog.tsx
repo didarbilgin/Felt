@@ -9,6 +9,7 @@ import { usePageContent } from '@/hooks/usePageContent';
 import { buildCategoryTabOptions } from '@/lib/cms/categoryTabs';
 import { getSection } from '@/lib/cms/pages';
 import { ApiError } from '@/lib/ApiError';
+import { NewsletterSubscribeBlock } from '@/components/applications/NewsletterSubscribeBlock';
 import { blogApi } from '@/lib/api/blog';
 import { BlogPost, BlogCategory, blogCategoryLabels } from '@/lib/types';
 
@@ -113,19 +114,12 @@ export default function Blog() {
           <p className="mt-4 text-primary-foreground/80 max-w-xl mx-auto leading-relaxed">
             {newsletter?.subtitle || 'Haftalık içgörüler ve yeni yayınlardan haberdar olun'}
           </p>
-          <form className="mt-8 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder={newsletter?.content || 'E-posta adresiniz'}
-              className="flex-1 px-4 py-2.5 rounded-md border border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary-foreground/30"
+          <div className="mt-8">
+            <NewsletterSubscribeBlock
+              variant="inverted"
+              sourceTitle={newsletter?.title || 'Blog Bülteni'}
             />
-            <button
-              type="submit"
-              className="px-6 py-2.5 bg-primary-foreground text-primary rounded-md font-medium hover:bg-primary-foreground/90 transition-colors shrink-0"
-            >
-              Abone Ol
-            </button>
-          </form>
+          </div>
         </div>
       </section>
       ) : null}

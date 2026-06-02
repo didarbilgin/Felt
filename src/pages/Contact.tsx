@@ -12,7 +12,10 @@ import { usePageContent } from '@/hooks/usePageContent';
 import { SocialLinks } from '@/components/layout/SocialLinks';
 import { FELT_CONTACT_EMAIL } from '@/lib/socialLinks';
 import { getSection } from '@/lib/cms/pages';
-import { contactApi } from '@/lib/api/contact';
+import { applicationsApi } from '@/lib/api/applications';
+import { NewsletterSubscribeBlock } from '@/components/applications/NewsletterSubscribeBlock';
+import { validateApplicationForm } from '@/components/applications/ApplicationFormFields';
+import { formatApiErrorMessage } from '@/lib/api/errorMessage';
 import { ContactType, contactTypeLabels } from '@/lib/types';
 
 export default function Contact() {
@@ -26,70 +29,74 @@ export default function Contact() {
 
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
+    organization: '',
+    title: '',
     type: '' as ContactType | '',
     message: '',
   });
-  const [newsletterEmail, setNewsletterEmail] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.type || !formData.message) {
+    if (!formData.name || !formData.email || !formData.phone || !formData.type || !formData.message) {
       toast({
         title: 'Hata',
-        description: 'Lütfen tüm alanları doldurun.',
+        description: 'Lütfen zorunlu alanları doldurun.',
         variant: 'destructive',
       });
       return;
     }
 
+    const validation = validateApplicationForm({
+      fullName: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      organization: formData.organization,
+      title: formData.title,
+      message: formData.message,
+    });
+    if (validation) {
+      toast({ title: 'Hata', description: validation, variant: 'destructive' });
+      return;
+    }
+
     setLoading(true);
     try {
-      await contactApi.submitMessage({
-        name: formData.name,
-        email: formData.email,
-        type: formData.type as ContactType,
-        message: formData.message,
+      const typeLabel = contactTypeLabels[formData.type as ContactType];
+      await applicationsApi.create({
+        sourceType: 'contact',
+        sourceTitle: `İletişim — ${typeLabel}`,
+        fullName: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        organization: formData.organization.trim() || null,
+        title: formData.title.trim() || null,
+        message: `[${typeLabel}]\n\n${formData.message.trim()}`,
       });
       toast({
         title: 'Başarılı',
         description: 'Mesajınız alındı. Teşekkür ederiz.',
       });
-      setFormData({ name: '', email: '', type: '', message: '' });
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        organization: '',
+        title: '',
+        type: '',
+        message: '',
+      });
     } catch (error) {
       toast({
         title: 'Hata',
-        description: 'Mesaj gönderilemedi. Lütfen tekrar deneyin.',
+        description: formatApiErrorMessage(error),
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleNewsletter = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newsletterEmail) return;
-
-    setNewsletterLoading(true);
-    try {
-      await contactApi.subscribe(newsletterEmail);
-      toast({
-        title: 'Başarılı',
-        description: 'Bültene başarıyla abone oldunuz.',
-      });
-      setNewsletterEmail('');
-    } catch (error: any) {
-      toast({
-        title: 'Hata',
-        description: error.message || 'Abonelik işlemi başarısız.',
-        variant: 'destructive',
-      });
-    } finally {
-      setNewsletterLoading(false);
     }
   };
 
@@ -114,27 +121,62 @@ export default function Contact() {
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="name">Ad Soyad</Label>
+                        <Label htmlFor="name">Ad Soyad *</Label>
                         <Input
                           id="name"
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                           placeholder="Adınız Soyadınız"
+                          required
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="email">E-posta</Label>
+                        <Label htmlFor="email">E-posta *</Label>
                         <Input
                           id="email"
                           type="email"
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                           placeholder="ornek@email.com"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Telefon *</Label>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          placeholder="+90 5xx xxx xx xx"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="organization">Kurum</Label>
+                        <Input
+                          id="organization"
+                          value={formData.organization}
+                          onChange={(e) =>
+                            setFormData({ ...formData, organization: e.target.value })
+                          }
+                          placeholder="İsteğe bağlı"
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="type">Konu</Label>
+                      <Label htmlFor="title">Ünvan</Label>
+                      <Input
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        placeholder="İsteğe bağlı"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="type">Konu *</Label>
                       <Select
                         value={formData.type}
                         onValueChange={(value) => setFormData({ ...formData, type: value as ContactType })}
@@ -152,7 +194,7 @@ export default function Contact() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="message">Mesajınız</Label>
+                      <Label htmlFor="message">Mesajınız *</Label>
                       <Textarea
                         id="message"
                         value={formData.message}
@@ -215,23 +257,7 @@ export default function Contact() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleNewsletter} className="space-y-3">
-                    <Input
-                      type="email"
-                      value={newsletterEmail}
-                      onChange={(e) => setNewsletterEmail(e.target.value)}
-                      placeholder="E-posta adresiniz"
-                      className="bg-background"
-                    />
-                    <Button
-                      type="submit"
-                      variant="default"
-                      className="w-full"
-                      disabled={newsletterLoading}
-                    >
-                      {newsletterLoading ? 'Kaydediliyor...' : 'Abone Ol'}
-                    </Button>
-                  </form>
+                  <NewsletterSubscribeBlock sourceTitle="İletişim Bülteni" />
                 </CardContent>
               </Card>
 

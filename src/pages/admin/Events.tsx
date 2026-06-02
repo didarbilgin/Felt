@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Users } from 'lucide-react';
+import { ApplicationsParticipantsSheet } from '@/components/admin/ApplicationsParticipantsSheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -42,6 +43,8 @@ export default function AdminEvents() {
   const [events, setEvents] = useState<Event[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Event | null>(null);
+  const [participantsOpen, setParticipantsOpen] = useState(false);
+  const [participantsEvent, setParticipantsEvent] = useState<Event | null>(null);
   const [form, setForm] = useState<EventFormState>(emptyForm);
   const [typeOptions, setTypeOptions] = useState<{ value: string; label: string }[]>([]);
 
@@ -228,7 +231,7 @@ export default function AdminEvents() {
               <TableHead>Tarih</TableHead>
               <TableHead>Durum</TableHead>
               <TableHead>Konum</TableHead>
-              <TableHead className="w-24" />
+              <TableHead className="w-36" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -245,6 +248,17 @@ export default function AdminEvents() {
                 <TableCell>{e.location}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="Katılımcılar"
+                      onClick={() => {
+                        setParticipantsEvent(e);
+                        setParticipantsOpen(true);
+                      }}
+                    >
+                      <Users className="h-4 w-4" />
+                    </Button>
                     <Button size="icon" variant="ghost" onClick={() => handleEdit(e)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -258,6 +272,14 @@ export default function AdminEvents() {
           </TableBody>
         </Table>
       </div>
+
+      <ApplicationsParticipantsSheet
+        open={participantsOpen}
+        onOpenChange={setParticipantsOpen}
+        sourceType="event"
+        sourceId={participantsEvent?.id}
+        sourceTitle={participantsEvent?.title || ''}
+      />
     </div>
   );
 }
