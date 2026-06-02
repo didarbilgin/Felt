@@ -56,3 +56,6 @@ backend/alembic/__pycache__/
 *.njsproj
 *.sln
 *.sw?
+
+playwright-report/
+test-results/

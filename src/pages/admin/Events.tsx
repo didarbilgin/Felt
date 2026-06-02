@@ -13,7 +13,7 @@ import { formatApiErrorMessage } from '@/lib/api/errorMessage';
 import { eventsApi } from '@/lib/api/events';
 import { buildFormCategoryOptions } from '@/lib/cms/categoryTabs';
 import { pagesApi } from '@/lib/cms/pages';
-import { Event, EventStatus, eventStatusLabels, eventTypeLabels } from '@/lib/types';
+import { Event, EventStatus, EventType, eventStatusLabels, eventTypeLabels } from '@/lib/types';
 
 const EVENT_FORM_EXCLUDE = ['all', 'upcoming', 'past'];
 
@@ -75,7 +75,7 @@ export default function AdminEvents() {
   const handleSave = async () => {
     const payload = {
       title: form.title,
-      type: form.type,
+      type: form.type as EventType,
       date: new Date(form.date),
       location: form.location,
       description: form.description,
