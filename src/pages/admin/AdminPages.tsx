@@ -18,6 +18,7 @@ import { AboutSectionsEditor } from '@/components/cms/admin/AboutSectionsEditor'
 import { SectionEditor } from '@/components/cms/admin/SectionEditor';
 import {
   PAGE_LABELS,
+  PAGE_ORDER,
   getAdminSectionLabel,
   shouldShowSectionInAdmin,
 } from '@/lib/cms/adminConfig';
@@ -27,7 +28,10 @@ import { formatApiErrorMessage } from '@/lib/api/errorMessage';
 import { pagesApi } from '@/lib/cms/pages';
 import type { PageContent, PageSection, PageSectionItem } from '@/lib/cms/types';
 
-const PAGE_OPTIONS = Object.entries(PAGE_LABELS).map(([key, label]) => ({ key, label }));
+const PAGE_OPTIONS = PAGE_ORDER.filter((key) => PAGE_LABELS[key]).map((key) => ({
+  key,
+  label: PAGE_LABELS[key],
+}));
 
 export default function AdminPages() {
   const { toast } = useToast();

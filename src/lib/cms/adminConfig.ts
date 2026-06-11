@@ -1,8 +1,8 @@
 import type { PageSection } from '@/lib/cms/types';
 
 export const PAGE_LABELS: Record<string, string> = {
-  about: 'Hakkında',
   home: 'Ana Sayfa',
+  about: 'Hakkında',
   research: 'Araştırma & Yayınlar',
   programs: 'Programlar',
   lab: 'FELT Lab',
@@ -12,6 +12,20 @@ export const PAGE_LABELS: Record<string, string> = {
   contact: 'İletişim',
   footer: 'Alt Bilgi',
 };
+
+/** Display order for the Sayfaları Düzenle page selector. */
+export const PAGE_ORDER: string[] = [
+  'home',
+  'about',
+  'research',
+  'programs',
+  'lab',
+  'events',
+  'community',
+  'blog',
+  'contact',
+  'footer',
+];
 
 /** Stable admin panel labels — never derived from public-facing section.title */
 export const SECTION_ADMIN_LABELS: Record<string, string> = {
