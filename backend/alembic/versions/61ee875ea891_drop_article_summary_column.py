@@ -19,16 +19,11 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 
-def upgrade():
+def upgrade() -> None:
+    op.execute(sa.text("ALTER TABLE articles DROP COLUMN IF EXISTS summary"))
 
-    op.drop_column("articles", "summary")
-
-def downgrade():
-
+def downgrade() -> None:
     op.add_column(
-
         "articles",
-
-        sa.Column("summary", sa.Text(), nullable=True)
-
+        sa.Column("summary", sa.Text(), nullable=True),
     )
