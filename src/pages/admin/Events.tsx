@@ -139,8 +139,8 @@ export default function AdminEvents() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading text-3xl font-bold">Etkinlikler</h1>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold">Etkinlikler</h1>
         <Dialog
           open={open}
           onOpenChange={(o) => {
@@ -169,7 +169,7 @@ export default function AdminEvents() {
                 <Label>Başlık</Label>
                 <Input value={form.title} onChange={(ev) => setForm({ ...form, title: ev.target.value })} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label>Tür</Label>
                   <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
@@ -233,7 +233,7 @@ export default function AdminEvents() {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="border rounded-lg">
+      <div className="admin-table-shell">
         <Table>
           <TableHeader>
             <TableRow>

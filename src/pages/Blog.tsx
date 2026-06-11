@@ -93,17 +93,19 @@ export default function Blog() {
       <section className="section-padding">
         <div className="container-wide">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1 mb-8">
-              {blogCategories.map((category) => (
-                <TabsTrigger
-                  key={category.value}
-                  value={category.value}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  {category.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="tabs-scroll mb-8">
+              <TabsList className="tabs-scroll-list bg-muted">
+                {blogCategories.map((category) => (
+                  <TabsTrigger
+                    key={category.value}
+                    value={category.value}
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm shrink-0"
+                  >
+                    {category.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
 
             <TabsContent value={activeTab}>
               {loadError ? (

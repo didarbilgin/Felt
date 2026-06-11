@@ -140,8 +140,8 @@ export default function AdminBlog() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading text-3xl font-bold">Blog Yazıları</h1>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold">Blog Yazıları</h1>
 
         <Dialog open={open} onOpenChange={handleDialogChange}>
           <DialogTrigger asChild>
@@ -165,7 +165,7 @@ export default function AdminBlog() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label>Kategori</Label>
                   <Select
@@ -248,7 +248,7 @@ export default function AdminBlog() {
         </Dialog>
       </div>
 
-      <div className="border rounded-lg">
+      <div className="admin-table-shell">
         <Table>
           <TableHeader>
             <TableRow>

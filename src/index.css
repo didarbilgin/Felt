@@ -122,6 +122,29 @@
   .section-padding {
     @apply py-16 md:py-24;
   }
+
+  /* Horizontal scroll for category tabs on narrow viewports */
+  .tabs-scroll {
+    @apply -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto overscroll-x-contain pb-1 md:overflow-visible md:pb-0;
+  }
+
+  .tabs-scroll-list {
+    @apply inline-flex h-auto w-max max-w-none flex-nowrap gap-1 p-1 md:flex-wrap md:w-full;
+  }
+
+  /* Admin data tables: contain overflow on small screens */
+  .admin-table-shell {
+    @apply border rounded-lg overflow-x-auto;
+  }
+
+  .admin-table-shell > div > table {
+    @apply min-w-[36rem];
+  }
+
+  .admin-table-shell--wide > div > table,
+  .admin-table-shell--wide table {
+    @apply min-w-[52rem];
+  }
   
   .card-hover {
     @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;

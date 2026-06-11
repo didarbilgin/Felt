@@ -30,7 +30,7 @@ export function ContentCardActions({
   if (!showDetail && !canApply && !href) return null;
 
   return (
-    <div className={`flex flex-wrap gap-2 ${className}`}>
+    <div className={`flex flex-wrap gap-2 w-full ${className}`}>
       {showDetail ? (
         <Button type="button" size={size} variant="outline" onClick={onDetail}>
           Detay

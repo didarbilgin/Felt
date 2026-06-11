@@ -63,7 +63,7 @@ export default function AdminContactMessages() {
       ) : messages.length === 0 ? (
         <p className="text-muted-foreground">Henüz mesaj yok.</p>
       ) : (
-        <div className="border rounded-lg overflow-hidden">
+        <div className="admin-table-shell">
           <Table>
             <TableHeader>
               <TableRow>

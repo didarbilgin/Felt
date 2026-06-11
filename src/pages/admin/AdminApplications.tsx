@@ -70,13 +70,15 @@ export default function AdminApplications() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="flex flex-wrap h-auto gap-1 mb-6">
-          {TAB_SOURCES.map((t) => (
-            <TabsTrigger key={t.value} value={t.value}>
-              {t.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="tabs-scroll mb-6">
+          <TabsList className="tabs-scroll-list bg-muted">
+            {TAB_SOURCES.map((t) => (
+              <TabsTrigger key={t.value} value={t.value} className="text-xs sm:text-sm shrink-0">
+                {t.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
 
         <TabsContent value={tab} className="mt-0">
           {loading ? (
@@ -84,7 +86,7 @@ export default function AdminApplications() {
           ) : items.length === 0 ? (
             <p className="text-muted-foreground py-8">Bu filtrede başvuru yok.</p>
           ) : (
-            <div className="border rounded-lg overflow-x-auto">
+            <div className="admin-table-shell admin-table-shell--wide">
               <ApplicationsListTable
                 items={items}
                 showSource

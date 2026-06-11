@@ -28,8 +28,8 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 sm:p-6">
+      <Card className="w-full max-w-md min-w-0">
         <CardHeader className="text-center">
           <CardTitle className="font-heading text-2xl">FELT Admin</CardTitle>
           <CardDescription>Yönetim paneline giriş yapın</CardDescription>

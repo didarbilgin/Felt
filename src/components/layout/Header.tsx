@@ -61,23 +61,29 @@ export function Header() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <nav className="lg:hidden py-4 border-t border-border">
+          <nav className="lg:hidden py-4 border-t border-border max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain">
             <div className="flex flex-col gap-1">
-              {navItems.map((item) => (
+              {navItems.map((item) => {
+                const path = item.href.split('#')[0];
+                const isActive =
+                  location.pathname === path ||
+                  (path !== '/' && location.pathname.startsWith(path));
+                return (
                 <Link
                   key={item.href}
                   to={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
                     "px-3 py-2 text-sm font-medium transition-colors rounded-md",
-                    location.pathname === item.href
+                    isActive
                       ? "text-primary bg-secondary"
                       : "text-muted-foreground hover:text-primary hover:bg-secondary/50"
                   )}
                 >
                   {item.label}
                 </Link>
-              ))}
+              );
+              })}
             </div>
           </nav>
         )}

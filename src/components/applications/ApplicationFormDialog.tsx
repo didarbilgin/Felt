@@ -101,7 +101,7 @@ export function ApplicationFormDialog({ open, onOpenChange, config }: Applicatio
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg">
         {step === 'form' ? (
           <>
             <DialogHeader>

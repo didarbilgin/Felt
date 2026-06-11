@@ -20,7 +20,7 @@ export function SocialLinks({ variant = 'footer', className }: SocialLinksProps)
       : 'w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors';
 
   return (
-    <div className={cn('flex gap-3', variant === 'footer' && 'gap-4', className)}>
+    <div className={cn('flex flex-wrap gap-3', variant === 'footer' && 'gap-4', className)}>
       {SOCIAL_LINK_ITEMS.map((item) => {
         const Icon = ICONS[item.id];
         return (

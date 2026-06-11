@@ -76,11 +76,11 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-primary-foreground/20 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="mt-12 pt-8 border-t border-primary-foreground/20 flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
           <p className="text-sm text-primary-foreground/60">
             © {new Date().getFullYear()} FELT. Tüm hakları saklıdır.
           </p>
-          <div className="flex gap-6 text-sm text-primary-foreground/60">
+          <div className="flex flex-wrap justify-center sm:justify-end gap-4 sm:gap-6 text-sm text-primary-foreground/60">
             <Link to="/privacy" className="hover:text-primary-foreground transition-colors">
               Gizlilik Politikası
             </Link>

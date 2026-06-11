@@ -84,7 +84,7 @@ export function ApplicationsParticipantsSheet({
           ) : items.length === 0 ? (
             <p className="text-sm text-muted-foreground">Henüz başvuru yok.</p>
           ) : (
-            <div className="border rounded-lg overflow-x-auto">
+            <div className="admin-table-shell admin-table-shell--wide">
               <ApplicationsListTable items={items} onStatusChange={updateStatus} />
             </div>
           )}

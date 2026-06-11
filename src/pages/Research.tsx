@@ -88,9 +88,9 @@ export default function Research() {
 
       <section className="section-padding">
         <div className="container-wide">
-          <div className="flex items-center gap-2 mb-6">
-            <span className="text-sm text-muted-foreground">{uiLabels.language_filter}</span>
-            <div className="flex gap-1">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-2 mb-6">
+            <span className="text-sm text-muted-foreground shrink-0">{uiLabels.language_filter}</span>
+            <div className="flex flex-wrap gap-1">
               {(['all', 'TR', 'EN'] as const).map((lang) => (
                 <Button
                   key={lang}
@@ -109,17 +109,19 @@ export default function Research() {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1">
-              {articleTypes.map((type) => (
-                <TabsTrigger
-                  key={type.value}
-                  value={type.value}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                >
-                  {type.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="tabs-scroll">
+              <TabsList className="tabs-scroll-list bg-muted">
+                {articleTypes.map((type) => (
+                  <TabsTrigger
+                    key={type.value}
+                    value={type.value}
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm shrink-0"
+                  >
+                    {type.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
 
             <TabsContent value={activeTab} className="mt-6">
               {loadError ? (
@@ -177,9 +179,9 @@ function ArticleCard({
   );
 
   return (
-    <div className="p-6 bg-card border border-border rounded-lg hover:shadow-md transition-shadow">
+    <div className="p-4 sm:p-6 bg-card border border-border rounded-lg hover:shadow-md transition-shadow">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-2">
             <Badge variant="secondary">{categoryLabel(article.type)}</Badge>
             <Badge variant="outline">{article.language}</Badge>
@@ -208,10 +210,10 @@ function ArticleCard({
             </div>
           ) : null}
         </div>
-        <div className="flex flex-col gap-2 shrink-0">
+        <div className="flex flex-col gap-2 w-full sm:w-auto shrink-0">
           <Link
             to={`/research/${article.slug}`}
-            className="inline-flex items-center justify-center gap-1 text-sm font-medium text-primary-foreground bg-primary px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
+            className="inline-flex w-full sm:w-auto items-center justify-center gap-1 text-sm font-medium text-primary-foreground bg-primary px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
           >
             Devamını Oku
             <ArrowRight className="h-4 w-4" />

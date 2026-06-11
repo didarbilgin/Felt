@@ -188,7 +188,7 @@ export default function Events() {
                     key={event.id}
                     className="flex flex-col lg:flex-row lg:items-stretch rounded-2xl overflow-hidden border border-border bg-card shadow-md min-h-[220px] lg:min-h-[260px]"
                   >
-                    <div className="lg:w-[36%] xl:w-[32%] bg-primary text-primary-foreground px-8 py-8 md:px-10 md:py-10 flex flex-col justify-center shrink-0">
+                    <div className="lg:w-[36%] xl:w-[32%] bg-primary text-primary-foreground px-5 py-6 sm:px-8 sm:py-8 md:px-10 md:py-10 flex flex-col justify-center shrink-0">
                       <div className="flex flex-wrap items-center gap-2 mb-5">
                         <Badge className="bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/25">
                           {eventTypeLabels[event.type]}
@@ -209,7 +209,7 @@ export default function Events() {
                       </div>
                     </div>
 
-                    <div className="flex-1 px-8 py-8 md:px-10 md:py-10 flex flex-col justify-center">
+                    <div className="flex-1 px-5 py-6 sm:px-8 sm:py-8 md:px-10 md:py-10 flex flex-col justify-center min-w-0">
                       <h3 className="font-heading text-2xl md:text-3xl font-bold text-foreground leading-snug">
                         {event.title}
                       </h3>
@@ -254,17 +254,19 @@ export default function Events() {
 
               <div className={showHighlight ? 'px-6 md:px-10 py-8 md:py-10' : ''}>
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="flex flex-wrap h-auto gap-1.5 bg-muted/80 p-1.5 mb-8 md:mb-10 w-full justify-start">
-                    {eventTypes.map((type) => (
-                      <TabsTrigger
-                        key={type.value}
-                        value={type.value}
-                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 py-2"
-                      >
-                        {type.label}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
+                  <div className="tabs-scroll mb-8 md:mb-10">
+                    <TabsList className="tabs-scroll-list bg-muted/80 p-1.5 md:w-full md:justify-start">
+                      {eventTypes.map((type) => (
+                        <TabsTrigger
+                          key={type.value}
+                          value={type.value}
+                          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-3 sm:px-4 py-2 text-xs sm:text-sm shrink-0"
+                        >
+                          {type.label}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </div>
 
                   <TabsContent value={activeTab} className="mt-0">
                     {loadError ? (

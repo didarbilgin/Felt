@@ -149,8 +149,8 @@ export default function AdminArticles() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading text-3xl font-bold">Makaleler</h1>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold">Makaleler</h1>
 
         <Dialog open={open} onOpenChange={handleDialogChange}>
           <DialogTrigger asChild>
@@ -174,7 +174,7 @@ export default function AdminArticles() {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="grid gap-2">
                   <Label>Tür</Label>
                   <Select
@@ -290,7 +290,7 @@ export default function AdminArticles() {
         </Dialog>
       </div>
 
-      <div className="border rounded-lg">
+      <div className="admin-table-shell">
         <Table>
           <TableHeader>
             <TableRow>

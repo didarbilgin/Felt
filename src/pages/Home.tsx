@@ -312,7 +312,7 @@ export default function Home() {
                 <p className="text-sm md:text-base font-medium tracking-wide text-primary-foreground/70 uppercase">
                   {heroEyebrow}
                 </p>
-                <h1 className="mt-4 font-heading text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.15]">
+                <h1 className="mt-4 font-heading text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-bold leading-[1.15] break-words">
                   {heroHeadline}
                 </h1>
                 <p className="mt-6 text-lg md:text-xl text-primary-foreground/85 max-w-2xl leading-relaxed">

@@ -80,7 +80,7 @@ export function NewsletterSubscribeBlock({
   }
 
   return (
-    <form onSubmit={handleSubmit} className={cn('text-left max-w-lg mx-auto', className)}>
+    <form onSubmit={handleSubmit} className={cn('text-left w-full max-w-lg mx-auto min-w-0', className)}>
       <div
         className={cn(
           'rounded-lg border p-4 space-y-4',

@@ -120,17 +120,19 @@ export default function Programs() {
       <section className="section-padding">
         <div className="container-wide">
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ProgramCategory | 'all')}>
-            <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1 mb-8">
-              {programCategories.map((category) => (
-                <TabsTrigger
-                  key={category.value}
-                  value={category.value}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm"
-                >
-                  {category.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <div className="tabs-scroll mb-8">
+              <TabsList className="tabs-scroll-list bg-muted data-[state=active]:shadow-sm">
+                {programCategories.map((category) => (
+                  <TabsTrigger
+                    key={category.value}
+                    value={category.value}
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm shrink-0"
+                  >
+                    {category.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
 
             <TabsContent value={activeTab}>
               {loadError ? (

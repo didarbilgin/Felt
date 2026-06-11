@@ -40,7 +40,7 @@ export function ApplicationFormFields({
   };
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 min-w-0">
       <div className="grid gap-2">
         <Label htmlFor={`${idPrefix}-fullName`}>Ad Soyad *</Label>
         <Input

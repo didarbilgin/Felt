@@ -130,8 +130,8 @@ export default function AdminPrograms() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading text-3xl font-bold">Programlar</h1>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold">Programlar</h1>
         <Dialog
           open={open}
           onOpenChange={(o) => {
@@ -235,7 +235,7 @@ export default function AdminPrograms() {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="border rounded-lg">
+      <div className="admin-table-shell">
         <Table>
           <TableHeader>
             <TableRow>
