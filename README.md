@@ -42,7 +42,7 @@ FELT Web Platform is the official website and content management system of FELT.
 Clone the repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/didarbilgin/Felt.git
 cd Felt
 ```
 
