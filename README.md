@@ -1,52 +1,23 @@
+# FELT Web Platform
 
-# Felt
+FELT Web Platform is the official website and content management system of FELT. The platform provides public-facing pages, an administration panel, content management capabilities, application workflows, and communication tools in a single system.
 
-**Building ideas that deserve to exist.**
+## Features
 
-Felt is a research-driven innovation platform focused on exploring emerging technologies, long-term opportunities, and meaningful digital products. The platform serves as the public face of the Felt initiative, presenting research areas, strategic priorities, roadmap planning, and organizational vision through a modern web experience.
-
----
-
-## Vision
-
-Felt exists to investigate, validate, and develop ideas that can create meaningful impact.
-
-Rather than focusing solely on short-term products, Felt emphasizes:
-
-- Research-first thinking
-- Long-term technological exploration
-- Human-centered innovation
-- Strategic product development
-- Sustainable digital ecosystems
-
----
-
-## Platform Overview
-
-The website is designed as a modern research and innovation portal featuring:
-
-### Home
-Landing experience introducing the Felt initiative.
-
-### About
-Overview of the organization's purpose, philosophy, and operating principles.
-
-### Manifesto
-Core beliefs and guiding principles that shape decision-making.
-
-### Research Areas
-Exploration of strategic focus areas and emerging technologies.
-
-### Strategic Roadmap
-Long-term planning and future objectives.
-
-### Contact
-Communication and collaboration channels.
-
-### Admin Panel
-Internal content management and administration interface.
-
----
+- Public website
+- Admin panel
+- CMS-driven page management
+- About page management
+- Programs management
+- Events management
+- Blog management
+- Research & publications management
+- Application tracking
+- Contact message management
+- Newsletter subscriptions
+- PostgreSQL database
+- Alembic migrations
+- Docker-based deployment
 
 ## Technology Stack
 
@@ -56,133 +27,163 @@ Internal content management and administration interface.
 - TypeScript
 - Vite
 - Tailwind CSS
-- shadcn/ui
-- React Router
+- Playwright
 
-### Deployment
+### Backend
 
-- Ubuntu Linux
-- Nginx
-- SSL via Certbot
-- GitHub
-- Domain: felt.blog
+- FastAPI
+- SQLAlchemy
+- Alembic
+- PostgreSQL
+- JWT Authentication
 
----
+## Installation
 
-## Project Structure
+Clone the repository:
 
-```text
-src/
-├── assets/
-├── components/
-├── hooks/
-├── layouts/
-├── lib/
-├── pages/
-├── services/
-├── types/
-└── App.tsx
+```bash
+git clone <repository-url>
+cd Felt
 ```
 
----
+Create your environment configuration:
 
-## Local Development
+```bash
+cp backend/.env.example backend/.env
+```
 
-### Frontend
+Update the `.env` file according to your environment.
+
+## Running with Docker
+
+Start all services:
+
+```bash
+docker compose up -d --build
+```
+
+Run database migrations:
+
+```bash
+docker compose exec api python -m alembic upgrade head
+```
+
+Seed the database with initial content:
+
+```bash
+docker compose exec api python seed.py
+```
+
+## Development
+
+Install frontend dependencies and start the development server:
 
 ```bash
 npm install
 npm run dev
 ```
 
-### Backend
+## Database Migrations
+
+Create a new migration:
 
 ```bash
 cd backend
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-# Configure environment (copy and edit)
-cp .env.example .env
-
-# Create schema
-alembic upgrade head
-
-# Populate admin, CMS, and sample content (safe to re-run)
-python seed.py
-
-uvicorn app.main:app --reload --port 8000
+alembic revision --autogenerate -m "migration message"
 ```
 
-Default admin after seeding (override with `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env`):
+Apply migrations:
 
-- Email: `admin@felt.com`
-- Password: `felt-admin`
+```bash
+alembic upgrade head
+```
 
-See [backend/app/seeds/README.md](backend/app/seeds/README.md) for seed details.
+Or inside Docker:
 
-## Production Build
+```bash
+docker compose exec api python -m alembic upgrade head
+```
+
+## Seed System
+
+The project includes an idempotent seed system for fresh installations.
+
+The seed process may create:
+
+- Default admin user
+- CMS pages and sections
+- About page content
+- Sample program
+- Sample event
+- Sample blog post
+- Sample research/publication entry
+
+Run the seed process:
+
+```bash
+docker compose exec api python seed.py
+```
+
+Running the command multiple times will not create duplicate records.
+
+## Testing
+
+Build the frontend:
 
 ```bash
 npm run build
-npm run preview
 ```
 
----
-
-## Production Deployment
+Run end-to-end tests:
 
 ```bash
-/var/www/felt/dist
+npm run test:e2e
 ```
 
-Example Nginx configuration:
-
-```nginx
-server {
-    listen 80;
-    server_name felt.blog www.felt.blog;
-
-    root /var/www/felt/dist;
-    index index.html;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-}
-```
-
-Enable SSL:
+Run lint checks:
 
 ```bash
-sudo certbot --nginx -d felt.blog -d www.felt.blog
+npm run lint
 ```
 
----
+## Deployment
 
-## Design Principles
+Update the server:
 
-- Simplicity over complexity
-- Clarity over decoration
-- Research before execution
-- Long-term thinking
-- Consistent visual language
-- Accessibility and responsiveness
+```bash
+git pull origin main
+```
 
----
+Rebuild services:
 
-## Roadmap
+```bash
+docker compose up -d --build
+```
 
-- Content management system
-- Research publication workflows
-- Newsletter infrastructure
-- Analytics dashboard
-- Multi-language support
-- Collaboration tools
+Apply migrations:
 
----
+```bash
+docker compose exec api python -m alembic upgrade head
+```
+
+Run seeds if required:
+
+```bash
+docker compose exec api python seed.py
+```
+
+## Security
+
+- Never store real passwords in the repository.
+- Do not commit `.env` files.
+- Keep secrets and credentials in environment variables.
+- Use HTTPS in production environments.
+- Replace all default credentials before production use.
+
+## Production Domain
+
+`felthk.com`
 
 ## License
 
-Private project. All rights reserved.
+Developed for FELT.
