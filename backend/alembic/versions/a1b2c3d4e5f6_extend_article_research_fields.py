@@ -40,10 +40,6 @@ def upgrade() -> None:
     op.add_column("articles", sa.Column("link", sa.String(length=500), nullable=True))
     op.add_column("articles", sa.Column("doi", sa.String(length=255), nullable=True))
 
-    op.execute(
-        sa.text("UPDATE articles SET abstract = summary WHERE abstract IS NULL AND summary IS NOT NULL")
-    )
-
 
 def downgrade() -> None:
     op.drop_column("articles", "doi")
