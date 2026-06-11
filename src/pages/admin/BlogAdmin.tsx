@@ -226,7 +226,7 @@ export default function AdminBlog() {
               </div>
 
               <div className="grid gap-2">
-                <Label>Dış bağlantı</Label>
+                <Label>Link — İsteğe Bağlı</Label>
                 <Input
                   value={form.link}
                   onChange={(event) => setForm({ ...form, link: event.target.value })}

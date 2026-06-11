@@ -198,14 +198,14 @@ export default function AdminPrograms() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Ek detay (modal)</Label>
+                <Label>Ek Detay (Modal) — İsteğe Bağlı</Label>
                 <Textarea
                   value={form.detailDescription}
                   onChange={(e) => setForm({ ...form, detailDescription: e.target.value })}
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Dış bağlantı</Label>
+                <Label>Link — İsteğe Bağlı</Label>
                 <Input
                   value={form.link}
                   onChange={(e) => setForm({ ...form, link: e.target.value })}

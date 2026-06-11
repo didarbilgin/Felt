@@ -22,6 +22,7 @@ import {
   shouldShowSectionInAdmin,
 } from '@/lib/cms/adminConfig';
 import { reorderPageSections } from '@/lib/cms/sectionOrder';
+import { compareSortOrder } from '@/lib/cms/sortOrder';
 import { formatApiErrorMessage } from '@/lib/api/errorMessage';
 import { pagesApi } from '@/lib/cms/pages';
 import type { PageContent, PageSection, PageSectionItem } from '@/lib/cms/types';
@@ -195,7 +196,7 @@ export default function AdminPages() {
   const visibleSections =
     page?.sections
       .filter((s) => shouldShowSectionInAdmin(s))
-      .sort((a, b) => a.sort_order - b.sort_order) ?? [];
+      .sort(compareSortOrder) ?? [];
 
   const showPageHeroCard =
     page && selectedPageKey !== 'home' && selectedPageKey !== 'footer';

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { shouldShowActiveToggle, shouldShowSortOrder } from '@/lib/cms/adminConfig';
+import { toSortOrder } from '@/lib/cms/sortOrder';
 import type { PageSection } from '@/lib/cms/types';
 
 type SectionCardShellProps = {
@@ -49,11 +50,11 @@ export function SectionCardShell({
                 type="number"
                 min={0}
                 className="h-8 w-20"
-                value={section.sort_order}
+                value={toSortOrder(section.sort_order)}
                 onChange={(e) => {
                   const raw = e.target.value;
                   if (raw === '') return;
-                  const next = Math.max(1, Number(raw) || 1);
+                  const next = Math.max(1, toSortOrder(raw) || 1);
                   if (onSortOrderChange) {
                     onSortOrderChange(sectionIndex, next);
                   } else {

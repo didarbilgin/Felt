@@ -144,32 +144,23 @@ FELT'i, eğitimin geleceğine dair düşünce, araştırma ve uygulamayı bir ar
 ]
 
 
-def seed_about_sections(db: Session):
-    for section_data in ABOUT_SECTIONS:
-        existing = (
-            db.query(AboutSection)
-            .filter(AboutSection.section_key == section_data["section_key"])
-            .first()
-        )
+def seed_about_sections_if_empty(db: Session) -> str:
+    """Insert starter About sections when the about_sections table is empty."""
+    if db.query(AboutSection).count() > 0:
+        return "skipped"
 
-        if existing:
-            existing.title = section_data["title"]
-            existing.content = section_data["content"]
-            existing.items = section_data["items"]
-            existing.sort_order = section_data["sort_order"]
-            existing.is_active = section_data["is_active"]
-        else:
-            section = AboutSection(**section_data)
-            db.add(section)
+    for section_data in ABOUT_SECTIONS:
+        db.add(AboutSection(**section_data))
 
     db.commit()
+    return "created"
 
 
 if __name__ == "__main__":
     db = SessionLocal()
 
     try:
-        seed_about_sections(db)
-        print("About sections seeded successfully.")
+        result = seed_about_sections_if_empty(db)
+        print("About sections seed:", result)
     finally:
         db.close()

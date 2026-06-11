@@ -363,28 +363,8 @@ SECTIONS = [
 ]
 
 
-def _upsert_page(db: Session, data: dict) -> Page:
-    page = db.query(Page).filter(Page.page_key == data["page_key"]).first()
-    if page:
-        for key, value in data.items():
-            setattr(page, key, value)
-        page.is_active = True
-    else:
-        page = Page(**data, is_active=True)
-        db.add(page)
-    return page
-
-
-def _upsert_section(db: Session, data: dict) -> None:
-    section = (
-        db.query(PageSection)
-        .filter(
-            PageSection.page_key == data["page_key"],
-            PageSection.section_key == data["section_key"],
-        )
-        .first()
-    )
-    payload = {
+def _section_payload(data: dict) -> dict:
+    return {
         "page_key": data["page_key"],
         "section_key": data["section_key"],
         "section_type": data.get("section_type", "text"),
@@ -395,34 +375,46 @@ def _upsert_section(db: Session, data: dict) -> None:
         "sort_order": data.get("sort_order", 0),
         "is_active": data.get("is_active", True),
     }
-    if section:
-        for key, value in payload.items():
-            setattr(section, key, value)
-    else:
-        db.add(PageSection(**payload))
 
 
-def seed_pages(db: Session):
+def seed_pages_if_empty(db: Session) -> str:
+    """Insert starter CMS pages when the pages table is empty."""
+    if db.query(Page).count() > 0:
+        return "skipped"
+
     for page_data in PAGES:
-        _upsert_page(db, page_data)
-
-    for section_data in SECTIONS:
-        _upsert_section(db, section_data)
-
-    # Retired sections — keep DB rows but never show on site or in admin
-    for retired_key in ("network-intro", "intro"):
-        db.query(PageSection).filter(PageSection.section_key == retired_key).update(
-            {"is_active": False},
-            synchronize_session=False,
-        )
+        db.add(Page(**page_data, is_active=True))
 
     db.commit()
+    return "created"
+
+
+def seed_page_sections_if_empty(db: Session) -> str:
+    """Insert starter page sections when the page_sections table is empty."""
+    if db.query(PageSection).count() > 0:
+        return "skipped"
+
+    if db.query(Page).count() == 0:
+        raise RuntimeError("Cannot seed page sections before pages exist.")
+
+    for section_data in SECTIONS:
+        db.add(PageSection(**_section_payload(section_data)))
+
+    db.commit()
+    return "created"
+
+
+def seed_cms_pages_if_empty(db: Session) -> dict[str, str]:
+    """Seed pages and page sections when their tables are empty."""
+    pages_result = seed_pages_if_empty(db)
+    sections_result = seed_page_sections_if_empty(db)
+    return {"pages": pages_result, "page_sections": sections_result}
 
 
 if __name__ == "__main__":
     db = SessionLocal()
     try:
-        seed_pages(db)
-        print("Pages CMS seeded successfully.")
+        result = seed_cms_pages_if_empty(db)
+        print("CMS pages seed:", result)
     finally:
         db.close()

@@ -52,6 +52,7 @@ export default function Events() {
   const [events, setEvents] = useState<Event[]>([]);
   const [activeTab, setActiveTab] = useState<string>('upcoming');
   const [loading, setLoading] = useState(true);
+  const [tabInitialized, setTabInitialized] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -101,14 +102,26 @@ export default function Events() {
     [activeTab, publicEvents],
   );
 
-  const highlightedEvents = useMemo(() => {
-    const now = new Date();
+  const upcomingEvents = useMemo(
+    () => publicEvents.filter((event) => getEventDisplayStatus(event) === 'upcoming'),
+    [publicEvents]
+  );
 
-    return publicEvents
-      .filter((event) => event.status === 'active')
-      .filter((event) => event.date.getTime() >= now.getTime())
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
-  }, [publicEvents]);
+  const highlightedEvents = useMemo(() => {
+    return [...upcomingEvents].sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [upcomingEvents]);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!tabInitialized) {
+      setActiveTab(upcomingEvents.length > 0 ? 'upcoming' : 'all');
+      setTabInitialized(true);
+      return;
+    }
+    if (activeTab === 'upcoming' && upcomingEvents.length === 0) {
+      setActiveTab('all');
+    }
+  }, [loading, tabInitialized, upcomingEvents.length, activeTab]);
 
   const showHighlight = highlightedEvents.length > 0;
   const displayHighlightedEvents = highlightedEvents.slice(0, 3);

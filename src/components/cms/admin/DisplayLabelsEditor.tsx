@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,47 +38,47 @@ export function DisplayLabelsEditor({
       pinnedKeys: [],
     };
 
-  const persisted = getEditableLabelState(section.items, config.pinnedKeys);
-  const [keys, setKeys] = useState(persisted.keys);
-  const [labels, setLabels] = useState(persisted.labels);
+  const persistedSnapshot = useMemo(() => {
+    const persisted = getEditableLabelState(section.items, config.pinnedKeys);
+    return JSON.stringify(persisted);
+  }, [section.items, config.pinnedKeys]);
+
+  const [keys, setKeys] = useState<string[]>([]);
+  const [labels, setLabels] = useState<string[]>([]);
 
   useEffect(() => {
     const next = getEditableLabelState(section.items, config.pinnedKeys);
     setKeys(next.keys);
     setLabels(next.labels);
-  }, [section.id, section.items, config.pinnedKeys.join(',')]);
-
-  const commit = (nextKeys: string[], nextLabels: string[]) => {
-    setKeys(nextKeys);
-    setLabels(nextLabels);
-    onUpdateSection(
-      sectionIndex,
-      'items',
-      syncEditableLabelItems(section.items, nextKeys, nextLabels, config.pinnedKeys)
-    );
-  };
+  }, [section.id, persistedSnapshot, config.pinnedKeys]);
 
   const updateLabel = (index: number, value: string) => {
     const nextLabels = [...labels];
     nextLabels[index] = value;
-    commit(keys, nextLabels);
+    setLabels(nextLabels);
   };
 
   const removeRow = (index: number) => {
-    commit(
-      keys.filter((_, i) => i !== index),
-      labels.filter((_, i) => i !== index)
-    );
+    setKeys(keys.filter((_, i) => i !== index));
+    setLabels(labels.filter((_, i) => i !== index));
   };
 
   const addRow = () => {
-    commit([...keys, ''], [...labels, '']);
+    setKeys([...keys, '']);
+    setLabels([...labels, '']);
   };
 
   const save = () => {
+    const syncedItems = syncEditableLabelItems(
+      section.items,
+      keys,
+      labels,
+      config.pinnedKeys
+    );
+    onUpdateSection(sectionIndex, 'items', syncedItems);
     onSave({
       ...section,
-      items: syncEditableLabelItems(section.items, keys, labels, config.pinnedKeys),
+      items: syncedItems,
     });
   };
 

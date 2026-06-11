@@ -1,4 +1,5 @@
 import type { PageSection } from '@/lib/cms/types';
+import { compareSortOrder } from '@/lib/cms/sortOrder';
 
 export const HOME_RENDERABLE_SECTION_KEYS = new Set([
   'hero',
@@ -22,7 +23,7 @@ export type HomeRenderBlock =
 export function getOrderedHomeSections(sections: PageSection[]): PageSection[] {
   return [...sections]
     .filter((s) => s.is_active && HOME_RENDERABLE_SECTION_KEYS.has(s.section_key))
-    .sort((a, b) => a.sort_order - b.sort_order);
+    .sort(compareSortOrder);
 }
 
 /** One CMS section → one public block, in sort_order. */

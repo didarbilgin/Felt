@@ -1,3 +1,5 @@
+import { compareSortOrder } from '@/lib/cms/sortOrder';
+
 /** Move one managed section to a 1-based position; renumber managed 1..n, preserve unmanaged. */
 export function reorderPageSections<T extends { id: string | number; sort_order: number }>(
   allSections: T[],
@@ -5,7 +7,7 @@ export function reorderPageSections<T extends { id: string | number; sort_order:
   targetPosition: number,
   isManaged: (section: T) => boolean = () => true
 ): T[] {
-  const managed = allSections.filter(isManaged).sort((a, b) => a.sort_order - b.sort_order);
+  const managed = allSections.filter(isManaged).sort(compareSortOrder);
   const fromIdx = managed.findIndex((s) => s.id === sectionId);
   if (fromIdx < 0) return allSections;
 
@@ -31,7 +33,7 @@ export function buildDisplayOrderMap<T extends { section_key?: string; sort_orde
   sections: T[],
   keyFn: (section: T) => string = (s) => (s as { section_key: string }).section_key
 ): Map<string, number> {
-  const sorted = [...sections].sort((a, b) => a.sort_order - b.sort_order);
+  const sorted = [...sections].sort(compareSortOrder);
   const map = new Map<string, number>();
   sorted.forEach((section, index) => {
     map.set(keyFn(section), index + 1);

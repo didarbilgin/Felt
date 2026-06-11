@@ -1,3 +1,6 @@
+import os
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -21,7 +24,25 @@ from app.routes.pages import public_router as pages_public_router
 from app.routes.applications import admin_router as applications_admin_router
 from app.routes.applications import public_router as applications_public_router
 
-app = FastAPI(title="FELT API")
+def _should_run_seed_on_startup() -> bool:
+    return os.getenv("RUN_SEED_ON_STARTUP", "").strip().lower() in ("1", "true", "yes")
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    if _should_run_seed_on_startup():
+        from app.core.database import SessionLocal
+        from app.seeds.run import run_all_seeds
+
+        db = SessionLocal()
+        try:
+            run_all_seeds(db)
+        finally:
+            db.close()
+    yield
+
+
+app = FastAPI(title="FELT API", lifespan=lifespan)
 
 origins = [o.strip() for o in app_settings.CORS_ORIGINS.split(",") if o.strip()]
 

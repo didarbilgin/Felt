@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { FOUNDER_CV_DEFAULT } from '@/lib/aboutDefaults';
 import { reorderPageSections } from '@/lib/cms/sectionOrder';
+import { compareSortOrder } from '@/lib/cms/sortOrder';
 import { API_BASE_URL } from '@/lib/mock-api';
 import { authApi } from '@/lib/api/auth';
 
@@ -260,7 +261,7 @@ export function AboutSectionsEditor() {
       )}
 
       {[...sections]
-        .sort((a, b) => a.sort_order - b.sort_order)
+        .sort(compareSortOrder)
         .map((section) => {
         const sectionIndex = sections.findIndex((s) => s.id === section.id);
         if (sectionIndex < 0) return null;

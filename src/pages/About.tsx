@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { FOUNDER_CV_DEFAULT } from '@/lib/aboutDefaults';
 import { buildDisplayOrderMap, formatSubsectionNumber } from '@/lib/cms/sectionOrder';
+import { compareSortOrder } from '@/lib/cms/sortOrder';
 import { API_BASE_URL } from '@/lib/mock-api';
 
 type AboutItem = {
@@ -61,7 +62,7 @@ export default function About() {
   const orderedSections = useMemo(() => {
     const active = sections
       .filter((section) => section.is_active)
-      .sort((a, b) => a.sort_order - b.sort_order);
+      .sort(compareSortOrder);
 
     if (!active.some((s) => s.section_key === 'founder-cv')) {
       active.push({
@@ -73,7 +74,7 @@ export default function About() {
         sort_order: FOUNDER_CV_DEFAULT.sort_order,
         is_active: true,
       });
-      active.sort((a, b) => a.sort_order - b.sort_order);
+      active.sort(compareSortOrder);
     }
 
     return active;

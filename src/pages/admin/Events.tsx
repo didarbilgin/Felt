@@ -218,14 +218,14 @@ export default function AdminEvents() {
                 <Textarea value={form.description} onChange={(ev) => setForm({ ...form, description: ev.target.value })} />
               </div>
               <div className="grid gap-2">
-                <Label>Ek detay (modal)</Label>
+                <Label>Ek Detay (Modal) — İsteğe Bağlı</Label>
                 <Textarea
                   value={form.detailDescription}
                   onChange={(ev) => setForm({ ...form, detailDescription: ev.target.value })}
                 />
               </div>
               <div className="grid gap-2">
-                <Label>Dış bağlantı</Label>
+                <Label>Link — İsteğe Bağlı</Label>
                 <Input value={form.link} onChange={(ev) => setForm({ ...form, link: ev.target.value })} />
               </div>
               <Button onClick={handleSave}>Kaydet</Button>

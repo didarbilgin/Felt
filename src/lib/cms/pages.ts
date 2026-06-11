@@ -1,5 +1,6 @@
 import { apiRequest } from '@/lib/api/client';
 import type { PageContent, PageSection, PageSectionItem } from '@/lib/cms/types';
+import { compareSortOrder, toSortOrder } from '@/lib/cms/sortOrder';
 
 const PUBLIC_PAGES_PATH = '/api/pages';
 
@@ -8,17 +9,23 @@ const normalizeItems = (raw: unknown): PageSectionItem[] => {
   return raw.filter((item) => item && typeof item === 'object') as PageSectionItem[];
 };
 
+const normalizePageContent = (data: PageContent): PageContent => ({
+  ...data,
+  sort_order: toSortOrder(data.sort_order),
+  sections: (data.sections || [])
+    .map((section) => ({
+      ...section,
+      sort_order: toSortOrder(section.sort_order),
+      items: normalizeItems(section.items),
+    }))
+    .sort(compareSortOrder),
+});
+
 export const pagesApi = {
   getPage: async (pageKey: string): Promise<PageContent | null> => {
     try {
       const data = await apiRequest<PageContent>(`${PUBLIC_PAGES_PATH}/${pageKey}`);
-      return {
-        ...data,
-        sections: (data.sections || []).map((section) => ({
-          ...section,
-          items: normalizeItems(section.items),
-        })),
-      };
+      return normalizePageContent(data);
     } catch {
       return null;
     }
@@ -27,13 +34,7 @@ export const pagesApi = {
   getAdminPage: async (pageKey: string): Promise<PageContent | null> => {
     try {
       const data = await apiRequest<PageContent>(`/api/admin/pages/${pageKey}`);
-      return {
-        ...data,
-        sections: (data.sections || []).map((section) => ({
-          ...section,
-          items: normalizeItems(section.items),
-        })),
-      };
+      return normalizePageContent(data);
     } catch {
       return null;
     }

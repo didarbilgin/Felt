@@ -1,287 +1,214 @@
-# FELT Database Schema
+# Güncel Veritabanı Şeması
 
-Generated from PostgreSQL schema inspection.
+Veritabanı PostgreSQL üzerinde çalışmaktadır. Şema yönetimi Alembic migration dosyaları ile yapılmaktadır.
 
-- Database: `felt`
-- Schema: `public`
-- Owner: `felt`
+## 1. admin_users
+
+Admin panel kullanıcılarını tutar.
+
+| Alan | Tip | Açıklama |
+|---|---|---|
+| id | UUID | Birincil anahtar |
+| email | String(255) | Admin e-posta adresi, unique index |
+| password_hash | String(255) | Şifre hash değeri |
+| role | String(50) | Kullanıcı rolü |
+| created_at | DateTime(timezone=True) | Oluşturulma tarihi |
+| updated_at | DateTime(timezone=True) | Güncellenme tarihi |
 
 ---
 
-# Tables
+## 2. articles
 
-```text
-public
-├── admin_users
-├── alembic_version
-├── articles
-├── blog_posts
-├── contact_messages
-├── events
-├── newsletter_subscriptions
-└── programs
+Araştırma/yayın içeriklerini tutar.
+
+| Alan | Tip | Açıklama |
+|---|---|---|
+| id | UUID | Birincil anahtar |
+| title | String(255) | Makale başlığı |
+| slug | String(255) | URL slug değeri, unique index |
+| content | Text | Makale içeriği |
+| status | String(20) | Yayın durumu |
+| published_at | DateTime(timezone=True) | Yayınlanma tarihi |
+| created_at | DateTime(timezone=True) | Oluşturulma tarihi |
+| updated_at | DateTime(timezone=True) | Güncellenme tarihi |
+| abstract | Text | Özet/abstract alanı |
+| article_type | String(50) | İçerik türü |
+| year | Integer | Yayın yılı |
+| language | String(10) | İçerik dili |
+| source | String(255) | Kaynak bilgisi |
+| tags | JSON | Etiket listesi |
+| link | String(500) | Harici bağlantı |
+| doi | String(255) | DOI bilgisi |
+| authors | String(500) | Yazar bilgileri |
+| cover_image | String(500) | Kapak görseli bağlantısı |
+| pdf_link | String(500) | PDF bağlantısı |
+| detail_description | Text | Ek detay açıklaması |
+
+Not: summary alanı migration ile kaldırılmıştır.
+
+---
+
+## 3. programs
+
+| Alan | Tip |
+|---|---|
+| id | UUID |
+| title | String(255) |
+| category | String(50) |
+| target_audience | String(255) |
+| description | Text |
+| duration | String(100) |
+| status | String(20) |
+| created_at | DateTime |
+| updated_at | DateTime |
+| detail_description | Text |
+| link | String(500) |
+
+---
+
+## 4. events
+
+| Alan | Tip |
+|---|---|
+| id | UUID |
+| title | String(255) |
+| type | String(50) |
+| date | DateTime |
+| location | String(255) |
+| description | Text |
+| link | String(500) |
+| created_at | DateTime |
+| updated_at | DateTime |
+| status | String(20) |
+| detail_description | Text |
+
+---
+
+## 5. blog_posts
+
+| Alan | Tip |
+|---|---|
+| id | UUID |
+| title | String(255) |
+| slug | String(255) |
+| category | String(50) |
+| content | Text |
+| excerpt | Text |
+| publish_date | DateTime |
+| status | String(20) |
+| created_at | DateTime |
+| updated_at | DateTime |
+| detail_description | Text |
+| link | String(500) |
+
+---
+
+## 6. contact_messages
+
+| Alan | Tip |
+|---|---|
+| id | UUID |
+| name | String(255) |
+| email | String(255) |
+| subject | String(100) |
+| message | Text |
+| created_at | DateTime |
+
+---
+
+## 7. newsletter_subscriptions
+
+| Alan | Tip |
+|---|---|
+| id | UUID |
+| email | String(255) |
+| created_at | DateTime |
+
+---
+
+## 8. about_sections
+
+| Alan | Tip |
+|---|---|
+| id | UUID |
+| section_key | String(100) |
+| title | String(255) |
+| content | Text |
+| items | JSON |
+| sort_order | Integer |
+| is_active | Boolean |
+| created_at | DateTime |
+| updated_at | DateTime |
+
+---
+
+## 9. pages
+
+| Alan | Tip |
+|---|---|
+| id | UUID |
+| page_key | String(100) |
+| title | String(255) |
+| subtitle | Text |
+| slug | String(255) |
+| is_active | Boolean |
+| sort_order | Integer |
+| created_at | DateTime |
+| updated_at | DateTime |
+
+---
+
+## 10. page_sections
+
+| Alan | Tip |
+|---|---|
+| id | UUID |
+| page_key | String(100) |
+| section_key | String(100) |
+| section_type | String(50) |
+| title | String(255) |
+| subtitle | Text |
+| content | Text |
+| items | JSON |
+| sort_order | Integer |
+| is_active | Boolean |
+| created_at | DateTime |
+| updated_at | DateTime |
+
+Ek kısıt: page_key + section_key unique.
+
+---
+
+## 11. applications
+
+| Alan | Tip |
+|---|---|
+| id | UUID |
+| source_type | String(32) |
+| source_id | UUID |
+| source_title | String(500) |
+| full_name | String(255) |
+| email | String(255) |
+| phone | String(64) |
+| organization | String(255) |
+| title | String(255) |
+| message | Text |
+| status | String(32) |
+| created_at | DateTime |
+
+### Indexler
+
+- source_type
+- source_id
+- email
+- status
+- created_at
+
+## Kurulum
+
+```bash
+cd backend
+alembic upgrade head
 ```
 
----
-
-# 1. admin_users
-
-## Purpose
-Admin kullanıcılarını tutar.  
-JWT authentication işlemleri bu tablo üzerinden yapılır.
-
-## Columns
-
-| Column | Type | Nullable | Default | Notes |
-|---|---|---|---|---|
-| id | uuid | NO | - | Primary Key |
-| email | varchar(255) | NO | - | Unique |
-| password_hash | varchar(255) | NO | - | Hashed password |
-| role | varchar(50) | NO | - | Admin role |
-| created_at | timestamptz | NO | now() | Creation timestamp |
-| updated_at | timestamptz | NO | now() | Update timestamp |
-
-## Indexes
-
-| Name | Type |
-|---|---|
-| admin_users_pkey | PRIMARY KEY (id) |
-| ix_admin_users_email | UNIQUE (email) |
-
----
-
-# 2. alembic_version
-
-## Purpose
-Alembic migration versiyon bilgisini tutar.  
-Sistem tablosudur.
-
-## Columns
-
-| Column | Type | Nullable | Notes |
-|---|---|---|---|
-| version_num | varchar(32) | NO | Primary Key |
-
-## Indexes
-
-| Name | Type |
-|---|---|
-| alembic_version_pkc | PRIMARY KEY (version_num) |
-
----
-
-# 3. articles
-
-## Purpose
-Makale, yayın ve araştırma içeriklerini tutar.  
-Admin panelinden girilen araştırma/yayın içerikleri burada saklanır ve public Research sayfasına buradan yansıtılır.
-
-## Columns
-
-| Column | Type | Nullable | Default | Notes |
-|---|---|---|---|---|
-| id | uuid | NO | - | Primary Key |
-| title | varchar(255) | NO | - | Article title |
-| slug | varchar(255) | NO | - | Unique technical URL slug, generated from title |
-| article_type | varchar(50) | NO | `article` | Article category/type |
-| year | integer | NO | 2026 | Publication/display year |
-| language | varchar(10) | NO | `TR` | Content language |
-| source | varchar(255) | YES | - | Source / institution / publisher |
-| tags | json | NO | `[]` | Tag list as JSON array |
-| abstract | text | YES | - | Short abstract/summary shown in cards |
-| content | text | NO | - | Full article content |
-| link | varchar(500) | YES | - | Optional external link, currently not filled from admin form |
-| doi | varchar(255) | YES | - | Optional DOI, currently not filled from admin form |
-| status | varchar(20) | NO | - | draft / published |
-| published_at | timestamptz | YES | - | Publish timestamp |
-| created_at | timestamptz | NO | now() | Creation timestamp |
-| updated_at | timestamptz | NO | now() | Update timestamp |
-
-## Indexes
-
-| Name | Type |
-|---|---|
-| articles_pkey | PRIMARY KEY (id) |
-| ix_articles_slug | UNIQUE (slug) |
-
-## Notes
-
-- `slug` is a technical field and should not be filled manually by the admin user.
-- `tags` is stored as JSON array. Turkish characters may appear escaped in raw JSON view, but the actual value is valid.
-- `link` and `doi` are nullable and kept for possible future advanced usage.
-- `abstract` replaced the old `summary` concept.
-- The old `summary` column has been removed.
-
----
-
-# 4. blog_posts
-
-## Purpose
-Blog yazılarını tutar.
-
-## Columns
-
-| Column | Type | Nullable | Default | Notes |
-|---|---|---|---|---|
-| id | uuid | NO | - | Primary Key |
-| title | varchar(255) | NO | - | Blog title |
-| slug | varchar(255) | NO | - | Unique URL slug |
-| category | varchar(50) | NO | - | Blog category |
-| content | text | NO | - | Full content |
-| excerpt | text | NO | - | Short excerpt |
-| publish_date | timestamptz | NO | - | Publish date |
-| status | varchar(20) | NO | - | draft / published |
-| created_at | timestamptz | NO | now() | Creation timestamp |
-| updated_at | timestamptz | NO | now() | Update timestamp |
-
-## Indexes
-
-| Name | Type |
-|---|---|
-| blog_posts_pkey | PRIMARY KEY (id) |
-| ix_blog_posts_slug | UNIQUE (slug) |
-
----
-
-# 5. contact_messages
-
-## Purpose
-İletişim formundan gelen mesajları tutar.
-
-## Columns
-
-| Column | Type | Nullable | Default | Notes |
-|---|---|---|---|---|
-| id | uuid | NO | - | Primary Key |
-| name | varchar(255) | NO | - | Sender name |
-| email | varchar(255) | NO | - | Sender email |
-| subject | varchar(100) | NO | - | Message subject |
-| message | text | NO | - | Message body |
-| created_at | timestamptz | NO | now() | Creation timestamp |
-
-## Indexes
-
-| Name | Type |
-|---|---|
-| contact_messages_pkey | PRIMARY KEY (id) |
-
----
-
-# 6. events
-
-## Purpose
-Etkinlik kayıtlarını tutar.
-
-## Columns
-
-| Column | Type | Nullable | Default | Notes |
-|---|---|---|---|---|
-| id | uuid | NO | - | Primary Key |
-| title | varchar(255) | NO | - | Event title |
-| type | varchar(50) | NO | - | Event type |
-| date | timestamptz | NO | - | Event date |
-| location | varchar(255) | NO | - | Event location |
-| description | text | NO | - | Event description |
-| link | varchar(500) | YES | - | Optional event link |
-| created_at | timestamptz | NO | now() | Creation timestamp |
-| updated_at | timestamptz | NO | now() | Update timestamp |
-
-## Indexes
-
-| Name | Type |
-|---|---|
-| events_pkey | PRIMARY KEY (id) |
-
----
-
-# 7. newsletter_subscriptions
-
-## Purpose
-Newsletter aboneliklerini tutar.
-
-## Columns
-
-| Column | Type | Nullable | Default | Notes |
-|---|---|---|---|---|
-| id | uuid | NO | - | Primary Key |
-| email | varchar(255) | NO | - | Unique subscriber email |
-| created_at | timestamptz | NO | now() | Subscription timestamp |
-
-## Indexes
-
-| Name | Type |
-|---|---|
-| newsletter_subscriptions_pkey | PRIMARY KEY (id) |
-| ix_newsletter_subscriptions_email | UNIQUE (email) |
-
----
-
-# 8. programs
-
-## Purpose
-Program/eğitim/modül kayıtlarını tutar.
-
-## Columns
-
-| Column | Type | Nullable | Default | Notes |
-|---|---|---|---|---|
-| id | uuid | NO | - | Primary Key |
-| title | varchar(255) | NO | - | Program title |
-| category | varchar(50) | NO | - | Program category |
-| target_audience | varchar(255) | NO | - | Target audience |
-| description | text | NO | - | Program description |
-| duration | varchar(100) | NO | - | Program duration |
-| status | varchar(20) | NO | - | draft / active |
-| created_at | timestamptz | NO | now() | Creation timestamp |
-| updated_at | timestamptz | NO | now() | Update timestamp |
-
-## Indexes
-
-| Name | Type |
-|---|---|
-| programs_pkey | PRIMARY KEY (id) |
-
----
-
-# System Overview
-
-## Admin Protected Tables
-
-```text
-admin_users
-├── articles
-├── blog_posts
-├── programs
-└── events
-```
-
-These tables are managed through JWT-protected admin endpoints.
-
-## Public Input Tables
-
-```text
-contact_messages
-└── newsletter_subscriptions
-```
-
-These tables receive data from public forms.
-
-## Migration Table
-
-```text
-alembic_version
-```
-
-Stores the current Alembic migration state.
-
----
-
-# Notes
-
-- UUID is used as the primary key strategy across all business tables.
-- PostgreSQL is used as the primary relational database.
-- Alembic handles schema migrations.
-- FastAPI + SQLAlchemy backend architecture is used.
-- Frontend communicates through JWT Bearer authentication.
-- Articles now use `abstract` instead of the removed legacy `summary` field.
-- Article `slug`, `id`, `created_at`, `updated_at`, and `published_at` are system-managed fields.
+Bu komut tüm migration dosyalarını çalıştırarak güncel tablo yapısını oluşturur.

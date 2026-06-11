@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Plus, Save, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { syncProgramTabItems } from '@/lib/cms/programCategories';
@@ -25,37 +25,43 @@ export function ProgramCategoriesEditor({
   onUpdateSection,
   onSave,
 }: ProgramCategoriesEditorProps) {
-  const persistedLabels = (section.items || [])
-    .filter((i) => i.title !== 'all')
-    .map((i) => i.content || '');
+  const persistedLabels = useMemo(
+    () =>
+      (section.items || [])
+        .filter((i) => i.title !== 'all')
+        .map((i) => i.content || ''),
+    [section.items]
+  );
+
+  const persistedSnapshot = useMemo(
+    () => JSON.stringify(persistedLabels),
+    [persistedLabels]
+  );
 
   const [rows, setRows] = useState<string[]>(persistedLabels);
 
   useEffect(() => {
     setRows(persistedLabels);
-  }, [section.id, persistedLabels.join('\x00')]);
-
-  const commitRows = (nextRows: string[]) => {
-    setRows(nextRows);
-    onUpdateSection(
-      sectionIndex,
-      'items',
-      syncProgramTabItems(section.items || [], nextRows)
-    );
-  };
+  }, [section.id, persistedSnapshot]);
 
   const updateRow = (index: number, value: string) => {
     const next = [...rows];
     next[index] = value;
-    commitRows(next);
+    setRows(next);
   };
 
   const removeRow = (index: number) => {
-    commitRows(rows.filter((_, i) => i !== index));
+    setRows(rows.filter((_, i) => i !== index));
   };
 
   const addRow = () => {
     setRows([...rows, '']);
+  };
+
+  const save = () => {
+    const syncedItems = syncProgramTabItems(section.items || [], rows);
+    onUpdateSection(sectionIndex, 'items', syncedItems);
+    onSave({ ...section, items: syncedItems });
   };
 
   return (
@@ -64,7 +70,7 @@ export function ProgramCategoriesEditor({
       section={section}
       sectionIndex={sectionIndex}
       onUpdateSection={onUpdateSection}
-      onSave={() => onSave({ ...section, items: syncProgramTabItems(section.items || [], rows) })}
+      onSave={save}
       showActiveToggle={false}
     >
       <p className="text-sm text-muted-foreground">

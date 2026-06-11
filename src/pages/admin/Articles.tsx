@@ -247,7 +247,7 @@ export default function AdminArticles() {
               </div>
 
               <div className="grid gap-2">
-                <Label>Ek detay (Detay modalı)</Label>
+                <Label>Ek Detay (Modal) — İsteğe Bağlı</Label>
                 <Textarea
                   value={form.detailDescription}
                   onChange={(e) => setForm({ ...form, detailDescription: e.target.value })}
