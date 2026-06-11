@@ -172,13 +172,6 @@ Run seeds if required:
 docker compose exec api python seed.py
 ```
 
-## Security
-
-- Never store real passwords in the repository.
-- Do not commit `.env` files.
-- Keep secrets and credentials in environment variables.
-- Use HTTPS in production environments.
-- Replace all default credentials before production use.
 
 ## Production Domain
 
