@@ -1,8 +1,9 @@
 import { ApiError } from '@/lib/ApiError';
 import { getAuthToken } from '@/lib/authStorage';
 import { prepareAdminAuthBeforeRequest } from '@/lib/adminSession';
+import { buildApiUrl } from '@/lib/api/config';
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+export { getApiBaseUrl, buildApiUrl } from '@/lib/api/config';
 
 export { ApiError } from '@/lib/ApiError';
 export { AUTH_KEY, getStoredAuth, getAuthToken } from '@/lib/authStorage';
@@ -20,7 +21,7 @@ export const apiRequest = async <T>(path: string, init?: RequestInit): Promise<T
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(buildApiUrl(path), {
     ...init,
     headers,
   });

@@ -20,6 +20,7 @@ import BlogPost from "@/pages/BlogPost";
 import Contact from "@/pages/Contact";
 import AdminLogin from "@/pages/admin/Login";
 import AdminDashboard from "@/pages/admin/Dashboard";
+import AdminAnalytics from "@/pages/admin/Analytics";
 import AdminArticles from "@/pages/admin/Articles";
 import AdminPrograms from "@/pages/admin/Programs";
 import AdminEvents from "@/pages/admin/Events";
@@ -59,6 +60,7 @@ const App = () => (
             <Route path="contact-messages" element={<AdminContactMessages />} />
             <Route path="applications" element={<AdminApplications />} />
             <Route index element={<AdminDashboard />} />
+            <Route path="analytics" element={<AdminAnalytics />} />
             <Route path="articles" element={<AdminArticles />} />
             <Route path="programs" element={<AdminPrograms />} />
             <Route path="events" element={<AdminEvents />} />

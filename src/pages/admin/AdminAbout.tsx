@@ -8,24 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { API_BASE_URL } from "@/lib/mock-api";
-import { authApi } from "@/lib/api/auth";
-
-type AboutItem = {
-    number?: string;
-    title: string;
-    content: string;
-};
-
-type AboutSection = {
-    id: number;
-    section_key: string;
-    title: string;
-    content?: string | null;
-    items?: AboutItem[] | null;
-    sort_order: number;
-    is_active: boolean;
-};
+import {
+    aboutSectionsApi,
+    type AboutItem,
+    type AboutSection,
+} from "@/lib/api/aboutSections";
 
 const ABOUT_SECTION_LABELS: Record<string, string> = {
     founder: 'Kurucunun Mesajı',
@@ -37,14 +24,6 @@ const ABOUT_SECTION_LABELS: Record<string, string> = {
     'research-areas': 'Araştırma Alanları',
 };
 
-const getAuthHeaders = () => {
-    const currentUser = authApi.getCurrentUser();
-
-    return {
-        Authorization: `Bearer ${currentUser?.accessToken}`,
-    };
-};
-
 export default function AdminAbout() {
     const { toast } = useToast();
 
@@ -53,26 +32,8 @@ export default function AdminAbout() {
 
     const loadSections = async () => {
         try {
-            const res = await fetch(`${API_BASE_URL}/api/admin/about-sections`, {
-                headers: getAuthHeaders(),
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                console.error("About sections load failed:", data);
-                setSections([]);
-                return;
-            }
-
-            if (Array.isArray(data)) {
-                setSections(data);
-            } else if (Array.isArray(data.items)) {
-                setSections(data.items);
-            } else {
-                console.error("Unexpected response:", data);
-                setSections([]);
-            }
+            const data = await aboutSectionsApi.listAdmin();
+            setSections(data);
         } catch (error) {
             console.error("About sections load error:", error);
             setSections([]);
@@ -156,41 +117,14 @@ export default function AdminAbout() {
         };
 
         try {
-            const res = await fetch(
-                `${API_BASE_URL}/api/admin/about-sections/${section.id}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        ...getAuthHeaders(),
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(payload),
-                }
-            );
-
-            const data = await res.json().catch(() => null);
-
-            if (!res.ok) {
-                console.error("About section update failed:", data);
-
-                toast({
-                    title: "Hata",
-                    description: "Bölüm güncellenemedi.",
-                    variant: "destructive",
-                });
-
-                return;
-            }
-
+            await aboutSectionsApi.update(section.id, payload);
             toast({
                 title: "Kaydedildi",
-                description: `${section.title} başarıyla güncellendi.`,
+                description: `${ABOUT_SECTION_LABELS[section.section_key] || section.title} güncellendi.`,
             });
-
-            loadSections();
+            await loadSections();
         } catch (error) {
             console.error("About section update error:", error);
-
             toast({
                 title: "Hata",
                 description: "Bölüm güncellenemedi.",

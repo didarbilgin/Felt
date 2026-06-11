@@ -10,24 +10,12 @@ import { useToast } from '@/hooks/use-toast';
 import { FOUNDER_CV_DEFAULT } from '@/lib/aboutDefaults';
 import { reorderPageSections } from '@/lib/cms/sectionOrder';
 import { compareSortOrder } from '@/lib/cms/sortOrder';
-import { API_BASE_URL } from '@/lib/mock-api';
-import { authApi } from '@/lib/api/auth';
-
-type AboutItem = {
-  number?: string;
-  title: string;
-  content: string;
-};
-
-type AboutSection = {
-  id: string | number;
-  section_key: string;
-  title: string;
-  content?: string | null;
-  items?: AboutItem[] | null;
-  sort_order: number;
-  is_active: boolean;
-};
+import {
+  aboutSectionsApi,
+  isPersistedAboutSectionId,
+  type AboutItem,
+  type AboutSection,
+} from '@/lib/api/aboutSections';
 
 const ABOUT_SECTION_LABELS: Record<string, string> = {
   founder: 'Kurucunun Mesajı',
@@ -39,13 +27,6 @@ const ABOUT_SECTION_LABELS: Record<string, string> = {
   'research-areas': 'Araştırma Alanları',
 };
 
-const getAuthHeaders = () => {
-  const currentUser = authApi.getCurrentUser();
-  return {
-    Authorization: `Bearer ${currentUser?.accessToken}`,
-  };
-};
-
 export function AboutSectionsEditor() {
   const { toast } = useToast();
   const [sections, setSections] = useState<AboutSection[]>([]);
@@ -53,18 +34,7 @@ export function AboutSectionsEditor() {
 
   const loadSections = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/admin/about-sections`, {
-        headers: getAuthHeaders(),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setSections([]);
-        return;
-      }
-      let loaded: AboutSection[] = [];
-      if (Array.isArray(data)) loaded = data;
-      else if (Array.isArray(data.items)) loaded = data.items;
-
+      const loaded = await aboutSectionsApi.listAdmin();
       setSections(loaded);
 
       if (loaded.length > 0 && !loaded.some((s) => s.section_key === 'founder-cv')) {
@@ -104,23 +74,15 @@ export function AboutSectionsEditor() {
     setSections(updated);
   };
 
-  const canPersistSection = (section: AboutSection) =>
-    section.id !== 0 && section.id !== '' && section.id != null;
+  const canPersistSection = (section: AboutSection) => isPersistedAboutSectionId(section.id);
 
   const persistSortOrders = async (list: AboutSection[]) => {
     const updates = list.filter(canPersistSection);
-    const results = await Promise.all(
+    await Promise.all(
       updates.map((s) =>
-        fetch(`${API_BASE_URL}/api/admin/about-sections/${s.id}`, {
-          method: 'PUT',
-          headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sort_order: s.sort_order }),
-        })
+        aboutSectionsApi.update(s.id, { sort_order: s.sort_order })
       )
     );
-    if (results.some((res) => !res.ok)) {
-      throw new Error('Sıralama kaydedilemedi');
-    }
   };
 
   const handleSortOrderChange = async (sectionId: string | number, targetPosition: number) => {
@@ -172,17 +134,7 @@ export function AboutSectionsEditor() {
     };
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/admin/about-sections/${section.id}`, {
-        method: 'PUT',
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        toast({ title: 'Hata', description: 'Bölüm güncellenemedi.', variant: 'destructive' });
-        return;
-      }
-
+      await aboutSectionsApi.update(section.id, payload);
       toast({
         title: 'Kaydedildi',
         description: `${ABOUT_SECTION_LABELS[section.section_key] || section.title} güncellendi.`,
@@ -204,23 +156,7 @@ export function AboutSectionsEditor() {
     };
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/admin/about-sections`, {
-        method: 'POST',
-        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        if (!silent) {
-          toast({
-            title: 'Hata',
-            description: 'Kurucunun Özgeçmişi bölümü oluşturulamadı.',
-            variant: 'destructive',
-          });
-        }
-        return;
-      }
-
+      await aboutSectionsApi.create(payload);
       if (!silent) {
         toast({ title: 'Oluşturuldu', description: 'Kurucunun Özgeçmişi bölümü eklendi.' });
       }

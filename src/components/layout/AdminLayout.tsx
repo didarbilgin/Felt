@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
+  BarChart3,
   FileText,
   GraduationCap,
   Calendar,
@@ -20,6 +21,7 @@ import { useState } from 'react';
 
 const sidebarItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { label: 'Analitik', href: '/admin/analytics', icon: BarChart3 },
   { label: 'Makaleler', href: '/admin/articles', icon: FileText },
   { label: 'Programlar', href: '/admin/programs', icon: GraduationCap },
   { label: 'Etkinlikler', href: '/admin/events', icon: Calendar },

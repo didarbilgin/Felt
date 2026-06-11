@@ -17,6 +17,7 @@ from app.models.program import Program
 from app.models.about_section import AboutSection
 from app.models.page import Page, PageSection
 from app.models.application import Application
+from app.models.page_view import PageView
 from app.core.config import db_settings
 
 config = context.config

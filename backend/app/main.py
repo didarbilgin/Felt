@@ -23,6 +23,8 @@ from app.routes.pages import admin_router as pages_admin_router
 from app.routes.pages import public_router as pages_public_router
 from app.routes.applications import admin_router as applications_admin_router
 from app.routes.applications import public_router as applications_public_router
+from app.routes.analytics import admin_router as analytics_admin_router
+from app.routes.analytics import public_router as analytics_public_router
 
 def _should_run_seed_on_startup() -> bool:
     return os.getenv("RUN_SEED_ON_STARTUP", "").strip().lower() in ("1", "true", "yes")
@@ -44,7 +46,16 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(title="FELT API", lifespan=lifespan)
 
-origins = [o.strip() for o in app_settings.CORS_ORIGINS.split(",") if o.strip()]
+def _parse_cors_origins(raw: str) -> list[str]:
+    origins: list[str] = []
+    for part in raw.split(","):
+        origin = part.strip()
+        if origin and origin not in origins:
+            origins.append(origin)
+    return origins
+
+
+origins = _parse_cors_origins(app_settings.CORS_ORIGINS)
 
 app.add_middleware(
     CORSMiddleware,
@@ -71,6 +82,8 @@ app.include_router(pages_public_router)
 app.include_router(pages_admin_router)
 app.include_router(applications_public_router)
 app.include_router(applications_admin_router)
+app.include_router(analytics_public_router)
+app.include_router(analytics_admin_router)
 
 @app.get("/health")
 def health():

@@ -50,9 +50,44 @@ Create your environment configuration:
 
 ```bash
 cp backend/.env.example backend/.env
+cp .env.example .env
 ```
 
-Update the `.env` file according to your environment.
+Update the `.env` files according to your environment.
+
+### Google Analytics 4 (GA4)
+
+Public pages are tracked in GA4. Admin routes (`/admin/*`) are excluded.
+
+1. Open [Google Analytics](https://analytics.google.com/) and select your GA4 property (or create one).
+2. Go to **Admin → Data streams → Web** and copy the **Measurement ID** (format `G-XXXXXXXXXX`).
+3. Add it to the project root `.env` file:
+
+```env
+VITE_GA_MEASUREMENT_ID=G-SRG90586DF
+```
+
+4. Restart the dev server or rebuild for production:
+
+```bash
+npm run dev
+# or
+npm run build
+```
+
+Vite only exposes client env vars prefixed with `VITE_`. The built-in admin **Analitik** page keeps lightweight first-party stats; use GA4 as the primary analytics dashboard.
+
+### API URL (frontend)
+
+By default the frontend calls same-origin `/api/...` paths (no hardcoded host). This works when your reverse proxy forwards `/api` to the FastAPI backend.
+
+For local development, `npm run dev` proxies `/api` to `http://127.0.0.1:8000` via Vite.
+
+To point at a different API host (optional), set in the project root `.env`:
+
+```env
+VITE_API_URL=https://api.example.com
+```
 
 ## Running with Docker
 
@@ -62,11 +97,13 @@ Start all services:
 docker compose up -d --build
 ```
 
-Run database migrations:
+Run database migrations (required after pull — includes `page_views` for admin analytics):
 
 ```bash
 docker compose exec api python -m alembic upgrade head
 ```
+
+If **Admin → Analitik** returns HTTP 500, check that migrations reached `a7b8c9d0e1f2` (`page_views` table).
 
 Seed the database with initial content:
 

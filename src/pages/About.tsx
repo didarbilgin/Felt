@@ -3,23 +3,7 @@ import { cn } from '@/lib/utils';
 import { FOUNDER_CV_DEFAULT } from '@/lib/aboutDefaults';
 import { buildDisplayOrderMap, formatSubsectionNumber } from '@/lib/cms/sectionOrder';
 import { compareSortOrder } from '@/lib/cms/sortOrder';
-import { API_BASE_URL } from '@/lib/mock-api';
-
-type AboutItem = {
-  number?: string;
-  title: string;
-  content: string;
-};
-
-type AboutSection = {
-  id: string | number;
-  section_key: string;
-  title: string;
-  content?: string | null;
-  items?: AboutItem[] | null;
-  sort_order: number;
-  is_active: boolean;
-};
+import { aboutSectionsApi, type AboutSection } from '@/lib/api/aboutSections';
 
 export default function About() {
   const [activeSection, setActiveSection] = useState('founder');
@@ -29,16 +13,8 @@ export default function About() {
   useEffect(() => {
     const loadSections = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/about-sections`);
-        const data = await res.json();
-
-        if (Array.isArray(data)) {
-          setSections(data);
-        } else if (Array.isArray(data.items)) {
-          setSections(data.items);
-        } else {
-          setSections([]);
-        }
+        const data = await aboutSectionsApi.listPublic();
+        setSections(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('About sections load error:', error);
         setSections([]);

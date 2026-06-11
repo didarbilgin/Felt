@@ -1,4 +1,5 @@
 import { ApiError } from '@/lib/ApiError';
+import { buildApiUrl } from '@/lib/api/config';
 import {
   AUTH_KEY,
   clearStoredAuth,
@@ -8,8 +9,6 @@ import {
   getStoredAuth,
   patchStoredAuth,
 } from '@/lib/authStorage';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 /** Refresh access token when it expires within this window (ms) */
 export const ACCESS_REFRESH_THRESHOLD_MS = 2 * 60 * 1000;
@@ -58,7 +57,7 @@ async function performRefresh(): Promise<void> {
     throw new ApiError(401, 'No refresh token');
   }
 
-  const res = await fetch(`${API_URL}/api/auth/refresh`, {
+  const res = await fetch(buildApiUrl('/api/auth/refresh'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refresh_token: refreshToken }),
