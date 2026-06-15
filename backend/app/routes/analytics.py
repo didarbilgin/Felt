@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func
@@ -10,11 +11,13 @@ from app.schemas.analytics import (
     AnalyticsSummary,
     PageViewCreate,
     PageViewOut,
-    TopPageOut,
 )
 
 public_router = APIRouter(prefix="/api/analytics", tags=["analytics"])
 admin_router = APIRouter(prefix="/api/admin/analytics", tags=["admin:analytics"])
+
+SITE_ENTRY_PATH = "/"
+ANALYTICS_TZ = ZoneInfo("Europe/Istanbul")
 
 
 def _normalize_public_path(path: str) -> str:
@@ -28,15 +31,17 @@ def _normalize_public_path(path: str) -> str:
     return normalized
 
 
-def _utc_today_start() -> datetime:
-    now = datetime.now(timezone.utc)
-    return now.replace(hour=0, minute=0, second=0, microsecond=0)
+def _istanbul_today_start_utc() -> datetime:
+    """Start of the current calendar day in Turkey (Europe/Istanbul), as UTC."""
+    now_local = datetime.now(ANALYTICS_TZ)
+    start_local = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
+    return start_local.astimezone(timezone.utc)
 
 
 @public_router.post("/page-views", response_model=PageViewOut, status_code=201)
 def track_page_view(body: PageViewCreate, db: Session = Depends(get_db)):
-    path = _normalize_public_path(body.path)
-    obj = PageView(path=path, visitor_id=body.visitor_id)
+    _normalize_public_path(body.path)
+    obj = PageView(path=SITE_ENTRY_PATH, visitor_id=body.visitor_id)
     db.add(obj)
     db.commit()
     db.refresh(obj)
@@ -48,7 +53,7 @@ def get_analytics_summary(
     db: Session = Depends(get_db),
     _=Depends(get_current_admin),
 ):
-    today_start = _utc_today_start()
+    today_start = _istanbul_today_start_utc()
 
     total_visits = db.query(func.count(PageView.id)).scalar() or 0
     today_visits = (
@@ -73,27 +78,9 @@ def get_analytics_summary(
         .all()
     )
 
-    top_rows = (
-        db.query(PageView.path, func.count(PageView.id).label("visits"))
-        .group_by(PageView.path)
-        .order_by(func.count(PageView.id).desc(), PageView.path.asc())
-        .limit(10)
-        .all()
-    )
-    top_pages = [TopPageOut(path=row.path, visits=row.visits) for row in top_rows]
-
-    recent_visits = (
-        db.query(PageView)
-        .order_by(PageView.visited_at.desc())
-        .limit(20)
-        .all()
-    )
-
     return AnalyticsSummary(
         total_visits=total_visits,
         today_visits=today_visits,
         unique_visitors=unique_visitors,
         returning_visitors=returning_visitors,
-        top_pages=top_pages,
-        recent_visits=recent_visits,
     )

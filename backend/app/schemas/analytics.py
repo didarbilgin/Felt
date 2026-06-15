@@ -19,15 +19,8 @@ class PageViewOut(BaseModel):
         from_attributes = True
 
 
-class TopPageOut(BaseModel):
-    path: str
-    visits: int
-
-
 class AnalyticsSummary(BaseModel):
     total_visits: int
     today_visits: int
     unique_visitors: int
     returning_visitors: int
-    top_pages: list[TopPageOut]
-    recent_visits: list[PageViewOut]

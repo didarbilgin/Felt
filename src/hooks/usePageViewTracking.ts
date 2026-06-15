@@ -1,7 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { analyticsApi } from '@/lib/api/analytics';
 import { getOrCreateVisitorId } from '@/lib/visitorId';
+
+const SESSION_VISIT_KEY = 'felt_site_visit_tracked';
 
 const PUBLIC_PATH_PREFIXES = [
   '/',
@@ -22,18 +24,18 @@ function isPublicPath(pathname: string): boolean {
   );
 }
 
+/** Count one site visit per browser session (not per SPA route change). */
 export function usePageViewTracking() {
   const location = useLocation();
-  const lastTrackedPath = useRef<string | null>(null);
 
   useEffect(() => {
-    const path = location.pathname;
-    if (!isPublicPath(path)) return;
-    if (lastTrackedPath.current === path) return;
+    if (!isPublicPath(location.pathname)) return;
+    if (typeof sessionStorage === 'undefined') return;
+    if (sessionStorage.getItem(SESSION_VISIT_KEY)) return;
 
-    lastTrackedPath.current = path;
+    sessionStorage.setItem(SESSION_VISIT_KEY, '1');
     const visitorId = getOrCreateVisitorId();
-    analyticsApi.trackPageView(path, visitorId).catch(() => {
+    analyticsApi.trackSiteVisit(visitorId).catch(() => {
       // Non-blocking; analytics must not affect navigation.
     });
   }, [location.pathname]);
