@@ -56,6 +56,22 @@ export const SECTION_ADMIN_LABELS: Record<string, string> = {
   copyright: 'Telif Metni',
 };
 
+/** Fixed admin display order for the contact page (no sort-order input). */
+export const CONTACT_SECTION_ORDER: string[] = [
+  'contact-form',
+  'contact-info',
+  'contact-sidebar-newsletter',
+  'contact-sidebar-social',
+];
+
+export function compareContactSectionOrder(a: { section_key: string }, b: { section_key: string }): number {
+  const indexA = CONTACT_SECTION_ORDER.indexOf(a.section_key);
+  const indexB = CONTACT_SECTION_ORDER.indexOf(b.section_key);
+  const rankA = indexA >= 0 ? indexA : CONTACT_SECTION_ORDER.length;
+  const rankB = indexB >= 0 ? indexB : CONTACT_SECTION_ORDER.length;
+  return rankA - rankB;
+}
+
 /** Sections not shown in Sayfaları Düzenle (fixed in code only). */
 export const HIDDEN_ADMIN_SECTION_KEYS = new Set(['ui-labels', 'network-intro', 'intro']);
 

@@ -19,6 +19,7 @@ import { SectionEditor } from '@/components/cms/admin/SectionEditor';
 import {
   PAGE_LABELS,
   PAGE_ORDER,
+  compareContactSectionOrder,
   getAdminSectionLabel,
   shouldShowSectionInAdmin,
 } from '@/lib/cms/adminConfig';
@@ -200,7 +201,7 @@ export default function AdminPages() {
   const visibleSections =
     page?.sections
       .filter((s) => shouldShowSectionInAdmin(s))
-      .sort(compareSortOrder) ?? [];
+      .sort(selectedPageKey === 'contact' ? compareContactSectionOrder : compareSortOrder) ?? [];
 
   const showPageHeroCard =
     page && selectedPageKey !== 'home' && selectedPageKey !== 'footer';

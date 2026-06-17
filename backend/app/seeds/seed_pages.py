@@ -345,6 +345,7 @@ SECTIONS = [
         "page_key": "contact",
         "section_key": "contact-info",
         "section_type": "text",
+        "title": "İletişim Bilgileri",
         "items": [
             {"title": "E-posta", "content": "drhumeyrakalafat@gmail.com"},
             {"title": "Konum", "content": "İstanbul, Türkiye"},

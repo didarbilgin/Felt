@@ -67,6 +67,8 @@ export function SectionEditor(props: SectionEditorProps) {
   }
 
   if (variant === 'section-heading') {
+    const isContactPage = section.page_key === 'contact';
+
     return (
       <SectionCardShell
         title={adminLabel}
@@ -77,7 +79,7 @@ export function SectionEditor(props: SectionEditorProps) {
         onSortOrderChange={onSortOrderChange}
       >
         <div>
-          <Label>Başlık / rozet metni</Label>
+          <Label>{isContactPage ? 'Sayfada görünen başlık' : 'Başlık / rozet metni'}</Label>
           <Input
             className="mt-1"
             value={section.title || ''}
@@ -85,14 +87,19 @@ export function SectionEditor(props: SectionEditorProps) {
           />
         </div>
         <div>
-          <Label>Alt başlık / açıklama</Label>
+          <Label>{isContactPage ? 'Açıklama' : 'Alt başlık / açıklama'}</Label>
           <Textarea
             className="mt-1"
             value={section.subtitle || ''}
             onChange={(e) => onUpdateSection(sectionIndex, 'subtitle', e.target.value)}
-            rows={3}
+            rows={isContactPage ? 2 : 3}
           />
         </div>
+        {section.section_key === 'contact-sidebar-newsletter' ? (
+          <p className="text-sm text-muted-foreground">
+            Üstteki &quot;Bülten&quot; rozeti sabittir; yalnızca başlık ve açıklama düzenlenir.
+          </p>
+        ) : null}
       </SectionCardShell>
     );
   }
@@ -108,11 +115,12 @@ export function SectionEditor(props: SectionEditorProps) {
         onSortOrderChange={onSortOrderChange}
       >
         <div>
-          <Label>Başlık</Label>
+          <Label>Sayfada görünen başlık</Label>
           <Input
             className="mt-1"
             value={section.title || ''}
             onChange={(e) => onUpdateSection(sectionIndex, 'title', e.target.value)}
+            placeholder="Sosyal Medya"
           />
         </div>
       </SectionCardShell>
@@ -587,27 +595,60 @@ export function SectionEditor(props: SectionEditorProps) {
         onSave={handleSave}
         onSortOrderChange={onSortOrderChange}
       >
+        <div>
+          <Label>Kutucuk başlığı</Label>
+          <Input
+            className="mt-1"
+            value={section.title || ''}
+            onChange={(e) => onUpdateSection(sectionIndex, 'title', e.target.value)}
+            placeholder="İletişim Bilgileri"
+          />
+        </div>
+        <p className="text-sm text-muted-foreground border-t pt-3">
+          E-posta, telefon ve adres gibi satırlar aşağıda düzenlenir.
+        </p>
         {(section.items || []).map((item, itemIndex) => (
-          <div key={itemIndex} className="grid sm:grid-cols-2 gap-3">
-            <div>
-              <Label>Etiket</Label>
-              <Input
-                className="mt-1"
-                value={item.title || ''}
-                onChange={(e) => onUpdateItem(sectionIndex, itemIndex, 'title', e.target.value)}
-              />
+          <div key={itemIndex} className="border rounded-lg p-4 space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-muted-foreground">Satır {itemIndex + 1}</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-destructive"
+                onClick={() => onRemoveItem(sectionIndex, itemIndex)}
+              >
+                Sil
+              </Button>
             </div>
-            <div>
-              <Label>Değer</Label>
-              <Input
-                className="mt-1"
-                value={item.content || ''}
-                onChange={(e) => onUpdateItem(sectionIndex, itemIndex, 'content', e.target.value)}
-              />
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div>
+                <Label>Etiket</Label>
+                <Input
+                  className="mt-1"
+                  value={item.title || ''}
+                  placeholder="E-posta, Telefon, Adres…"
+                  onChange={(e) => onUpdateItem(sectionIndex, itemIndex, 'title', e.target.value)}
+                />
+              </div>
+              <div>
+                <Label>Değer</Label>
+                <Input
+                  className="mt-1"
+                  value={item.content || ''}
+                  placeholder="Görünecek bilgi"
+                  onChange={(e) => onUpdateItem(sectionIndex, itemIndex, 'content', e.target.value)}
+                />
+              </div>
             </div>
           </div>
         ))}
-        <Button type="button" variant="outline" size="sm" onClick={() => onAddItem(sectionIndex, { title: '', content: '' })}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => onAddItem(sectionIndex, { title: '', content: '' })}
+        >
           <Plus className="mr-2 h-4 w-4" />
           Satır Ekle
         </Button>

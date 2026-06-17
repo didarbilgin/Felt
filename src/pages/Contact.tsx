@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Mail, MapPin, Send } from 'lucide-react';
+import { Mail, MapPin, Phone, Send, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,13 +10,41 @@ import { useToast } from '@/hooks/use-toast';
 import { PageHero } from '@/components/cms/PageHero';
 import { usePageContent } from '@/hooks/usePageContent';
 import { SocialLinks } from '@/components/layout/SocialLinks';
-import { FELT_CONTACT_EMAIL } from '@/lib/socialLinks';
 import { getSection } from '@/lib/cms/pages';
 import { applicationsApi } from '@/lib/api/applications';
 import { NewsletterSubscribeBlock } from '@/components/applications/NewsletterSubscribeBlock';
 import { validateApplicationForm } from '@/components/applications/ApplicationFormFields';
 import { formatApiErrorMessage } from '@/lib/api/errorMessage';
 import { ContactType, contactTypeLabels } from '@/lib/types';
+
+function getContactInfoIcon(label: string): LucideIcon {
+  const normalized = label.toLocaleLowerCase('tr');
+  if (normalized.includes('e-posta') || normalized.includes('email') || normalized.includes('mail')) {
+    return Mail;
+  }
+  if (
+    normalized.includes('konum') ||
+    normalized.includes('adres') ||
+    normalized.includes('address')
+  ) {
+    return MapPin;
+  }
+  if (normalized.includes('telefon') || normalized.includes('phone') || normalized.includes('tel')) {
+    return Phone;
+  }
+  return Mail;
+}
+
+function getContactInfoHref(label: string, value: string): string | null {
+  const normalized = label.toLocaleLowerCase('tr');
+  if (normalized.includes('e-posta') || normalized.includes('email') || normalized.includes('mail')) {
+    return `mailto:${value}`;
+  }
+  if (normalized.includes('telefon') || normalized.includes('phone') || normalized.includes('tel')) {
+    return `tel:${value.replace(/\s/g, '')}`;
+  }
+  return null;
+}
 
 export default function Contact() {
   const { heroTitle, heroSubtitle, sections } = usePageContent('contact', {
@@ -27,8 +55,8 @@ export default function Contact() {
   const contactForm = getSection(sections, 'contact-form');
   const sidebarNewsletter = getSection(sections, 'contact-sidebar-newsletter');
   const sidebarSocial = getSection(sections, 'contact-sidebar-social');
-  const emailItem = contactInfo?.items?.find((i) => i.title === 'E-posta');
-  const locationItem = contactInfo?.items?.find((i) => i.title === 'Konum');
+  const contactInfoItems =
+    contactInfo?.items?.filter((item) => item.title?.trim() || item.content?.trim()) ?? [];
 
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -237,33 +265,41 @@ export default function Contact() {
             {/* Sidebar */}
             {(contactInfo || sidebarNewsletter || sidebarSocial) ? (
             <div className="space-y-6">
-              {contactInfo ? (
+              {contactInfo && contactInfoItems.length > 0 ? (
                 <Card className="border-border">
                   <CardHeader>
-                    <CardTitle className="text-lg">İletişim Bilgileri</CardTitle>
+                    <CardTitle className="text-lg">
+                      {contactInfo.title || 'İletişim Bilgileri'}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <Mail className="h-5 w-5 text-primary mt-0.5" />
-                      <div>
-                        <p className="font-medium text-foreground">E-posta</p>
-                        <a
-                          href={`mailto:${emailItem?.content || FELT_CONTACT_EMAIL}`}
-                          className="text-sm text-muted-foreground hover:text-primary"
-                        >
-                          {emailItem?.content || FELT_CONTACT_EMAIL}
-                        </a>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                      <div>
-                        <p className="font-medium text-foreground">Adres</p>
-                        <p className="text-sm text-muted-foreground">
-                          {locationItem?.content || 'İstanbul, Türkiye'}
-                        </p>
-                      </div>
-                    </div>
+                    {contactInfoItems.map((item, index) => {
+                      const label = item.title?.trim() || '';
+                      const value = item.content?.trim() || '';
+                      const Icon = getContactInfoIcon(label);
+                      const href = getContactInfoHref(label, value);
+
+                      return (
+                        <div key={`${label}-${index}`} className="flex items-start gap-3">
+                          <Icon className="h-5 w-5 text-primary mt-0.5" />
+                          <div>
+                            {label ? (
+                              <p className="font-medium text-foreground">{label}</p>
+                            ) : null}
+                            {href ? (
+                              <a
+                                href={href}
+                                className="text-sm text-muted-foreground hover:text-primary"
+                              >
+                                {value}
+                              </a>
+                            ) : (
+                              <p className="text-sm text-muted-foreground">{value}</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </CardContent>
                 </Card>
               ) : null}
