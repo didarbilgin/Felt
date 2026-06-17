@@ -19,19 +19,27 @@ const footerLinks = {
   ],
 };
 
+const DEFAULT_BRAND_TEXT =
+  'Futures of Education, Leadership & Technology — Eğitimin, liderliğin ve teknolojinin geleceğini şekillendiren araştırma ve eğitim platformu.';
+const DEFAULT_COPYRIGHT_TEXT = '© FELT. Tüm hakları saklıdır.';
+
 export function Footer() {
-  const [brandText, setBrandText] = useState(
-    'Futures of Education, Leadership & Technology — Eğitimin, liderliğin ve teknolojinin geleceğini şekillendiren araştırma ve eğitim platformu.'
-  );
-  const [copyrightText, setCopyrightText] = useState('© FELT. Tüm hakları saklıdır.');
+  const [brandText, setBrandText] = useState<string | null>(null);
+  const [copyrightText, setCopyrightText] = useState<string | null>(null);
 
   useEffect(() => {
-    pagesApi.getPage('footer').then((page) => {
-      const brand = getSection(page?.sections, 'brand');
-      const copyright = getSection(page?.sections, 'copyright');
-      if (brand?.content) setBrandText(brand.content);
-      if (copyright?.content) setCopyrightText(copyright.content);
-    });
+    pagesApi
+      .getPage('footer')
+      .then((page) => {
+        const brand = getSection(page?.sections, 'brand');
+        const copyright = getSection(page?.sections, 'copyright');
+        setBrandText(brand ? brand.content || DEFAULT_BRAND_TEXT : null);
+        setCopyrightText(copyright ? copyright.content || DEFAULT_COPYRIGHT_TEXT : null);
+      })
+      .catch(() => {
+        setBrandText(DEFAULT_BRAND_TEXT);
+        setCopyrightText(DEFAULT_COPYRIGHT_TEXT);
+      });
   }, []);
 
   return (
@@ -42,7 +50,9 @@ export function Footer() {
             <Link to="/" className="inline-block">
               <span className="font-heading text-3xl font-bold">FELT</span>
             </Link>
-            <p className="mt-3 text-sm text-primary-foreground/80 max-w-md">{brandText}</p>
+            {brandText !== null && brandText ? (
+              <p className="mt-3 text-sm text-primary-foreground/80 max-w-md">{brandText}</p>
+            ) : null}
             <SocialLinks variant="footer" className="mt-6" />
           </div>
 
@@ -79,8 +89,14 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-primary-foreground/20 flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
-          <p className="text-sm text-primary-foreground/60">{copyrightText}</p>
+        <div
+          className={`mt-12 pt-8 border-t border-primary-foreground/20 flex flex-col sm:flex-row gap-4 text-center sm:text-left ${
+            copyrightText !== null ? 'justify-between items-center' : 'justify-end items-center'
+          }`}
+        >
+          {copyrightText !== null && copyrightText ? (
+            <p className="text-sm text-primary-foreground/60">{copyrightText}</p>
+          ) : null}
           <div className="flex flex-wrap justify-center sm:justify-end gap-4 sm:gap-6 text-sm text-primary-foreground/60">
             <Link to="/privacy" className="hover:text-primary-foreground transition-colors">
               Gizlilik Politikası

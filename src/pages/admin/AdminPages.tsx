@@ -37,9 +37,9 @@ const PAGE_OPTIONS = PAGE_ORDER.filter((key) => PAGE_LABELS[key]).map((key) => (
 export default function AdminPages() {
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialPage = searchParams.get('page') || 'programs';
+  const initialPage = searchParams.get('page') || 'home';
   const [selectedPageKey, setSelectedPageKey] = useState(
-    PAGE_LABELS[initialPage] ? initialPage : 'programs'
+    PAGE_LABELS[initialPage] ? initialPage : 'home'
   );
   const [page, setPage] = useState<PageContent | null>(null);
   const [loading, setLoading] = useState(true);
