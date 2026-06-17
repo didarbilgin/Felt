@@ -87,6 +87,7 @@ export type SectionEditorVariant =
   | 'text-with-items'
   | 'contact-items'
   | 'footer-brand'
+  | 'footer-copyright'
   | 'hubs-ecosystem'
   | 'ecosystem-items'
   | 'display-labels'
@@ -143,8 +144,11 @@ export function getSectionEditorVariant(section: PageSection): SectionEditorVari
   if (key === 'blog-preview') return 'text-block';
   if (type === 'cards' && key !== 'lab-sections') return 'cards';
   if (key === 'contact-info') return 'contact-items';
+  if (page === 'footer') {
+    if (key === 'brand') return 'footer-brand';
+    if (key === 'copyright') return 'footer-copyright';
+  }
   if (type === 'text' && !section.items?.length) return 'text-block';
-  if (page === 'footer') return key === 'brand' ? 'footer-brand' : 'default';
   if (type === 'text' && section.items?.length) return 'text-with-items';
   if (type === 'quote') return 'content-only';
 

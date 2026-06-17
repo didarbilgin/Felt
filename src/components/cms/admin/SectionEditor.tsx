@@ -127,6 +127,53 @@ export function SectionEditor(props: SectionEditorProps) {
     );
   }
 
+  if (variant === 'footer-brand') {
+    return (
+      <SectionCardShell
+        title={adminLabel}
+        section={section}
+        sectionIndex={sectionIndex}
+        onUpdateSection={onUpdateSection}
+        onSave={handleSave}
+        onSortOrderChange={onSortOrderChange}
+      >
+        <div>
+          <Label>Marka açıklaması</Label>
+          <Textarea
+            className="mt-1"
+            value={section.content || ''}
+            onChange={(e) => onUpdateSection(sectionIndex, 'content', e.target.value)}
+            rows={4}
+          />
+        </div>
+      </SectionCardShell>
+    );
+  }
+
+  if (variant === 'footer-copyright') {
+    return (
+      <SectionCardShell
+        title={adminLabel}
+        section={section}
+        sectionIndex={sectionIndex}
+        onUpdateSection={onUpdateSection}
+        onSave={handleSave}
+        onSortOrderChange={onSortOrderChange}
+      >
+        <div>
+          <Label>Telif metni</Label>
+          <Textarea
+            className="mt-1"
+            value={section.content || ''}
+            onChange={(e) => onUpdateSection(sectionIndex, 'content', e.target.value)}
+            rows={2}
+            placeholder="© FELT. Tüm hakları saklıdır."
+          />
+        </div>
+      </SectionCardShell>
+    );
+  }
+
   if (variant === 'text-block') {
     return (
       <SectionCardShell

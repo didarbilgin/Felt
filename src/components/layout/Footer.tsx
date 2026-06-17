@@ -23,11 +23,14 @@ export function Footer() {
   const [brandText, setBrandText] = useState(
     'Futures of Education, Leadership & Technology — Eğitimin, liderliğin ve teknolojinin geleceğini şekillendiren araştırma ve eğitim platformu.'
   );
+  const [copyrightText, setCopyrightText] = useState('© FELT. Tüm hakları saklıdır.');
 
   useEffect(() => {
     pagesApi.getPage('footer').then((page) => {
       const brand = getSection(page?.sections, 'brand');
+      const copyright = getSection(page?.sections, 'copyright');
       if (brand?.content) setBrandText(brand.content);
+      if (copyright?.content) setCopyrightText(copyright.content);
     });
   }, []);
 
@@ -77,9 +80,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-primary-foreground/20 flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
-          <p className="text-sm text-primary-foreground/60">
-            © {new Date().getFullYear()} FELT. Tüm hakları saklıdır.
-          </p>
+          <p className="text-sm text-primary-foreground/60">{copyrightText}</p>
           <div className="flex flex-wrap justify-center sm:justify-end gap-4 sm:gap-6 text-sm text-primary-foreground/60">
             <Link to="/privacy" className="hover:text-primary-foreground transition-colors">
               Gizlilik Politikası
