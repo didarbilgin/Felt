@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { AdminLayout } from "@/components/layout/AdminLayout";
-import AdminContactMessages from "@/pages/admin/AdminContactMessages";
 import AdminPages from "@/pages/admin/AdminPages";
 import Home from "@/pages/Home";
 import About from "@/pages/About";
@@ -18,6 +17,8 @@ import Community from "@/pages/Community";
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
 import Contact from "@/pages/Contact";
+import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
 import AdminLogin from "@/pages/admin/Login";
 import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminAnalytics from "@/pages/admin/Analytics";
@@ -50,6 +51,8 @@ const App = () => (
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
           </Route>
 
           {/* Admin Routes */}
@@ -57,7 +60,6 @@ const App = () => (
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="about" element={<Navigate to="/admin/pages?page=about" replace />} />
             <Route path="pages" element={<AdminPages />} />
-            <Route path="contact-messages" element={<AdminContactMessages />} />
             <Route path="applications" element={<AdminApplications />} />
             <Route index element={<AdminDashboard />} />
             <Route path="analytics" element={<AdminAnalytics />} />

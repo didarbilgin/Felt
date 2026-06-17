@@ -24,6 +24,9 @@ export default function Contact() {
     subtitle: 'Önerileriniz, görüşleriniz ve mesajlarınız için bize yazın',
   });
   const contactInfo = getSection(sections, 'contact-info');
+  const contactForm = getSection(sections, 'contact-form');
+  const sidebarNewsletter = getSection(sections, 'contact-sidebar-newsletter');
+  const sidebarSocial = getSection(sections, 'contact-sidebar-social');
   const emailItem = contactInfo?.items?.find((i) => i.title === 'E-posta');
   const locationItem = contactInfo?.items?.find((i) => i.title === 'Konum');
 
@@ -122,14 +125,19 @@ export default function Contact() {
       {/* Content */}
       <section className="section-padding">
         <div className="container-wide">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Contact Form */}
+          <div
+            className={`grid grid-cols-1 gap-8 ${
+              contactForm ? 'lg:grid-cols-3' : 'lg:grid-cols-1 lg:max-w-md lg:ml-auto'
+            }`}
+          >
+            {contactForm ? (
             <div className="lg:col-span-2 scroll-mt-24" id="contact-form">
               <Card className="border-border">
                 <CardHeader>
-                  <CardTitle>Mesajınızı Paylaşın</CardTitle>
+                  <CardTitle>{contactForm?.title || 'Mesajınızı Paylaşın'}</CardTitle>
                   <CardDescription>
-                    Düşüncelerinizi, önerilerinizi veya sorularınızı bizimle paylaşabilirsiniz.
+                    {contactForm?.subtitle ||
+                      'Düşüncelerinizi, önerilerinizi veya sorularınızı bizimle paylaşabilirsiniz.'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -224,8 +232,10 @@ export default function Contact() {
                 </CardContent>
               </Card>
             </div>
+            ) : null}
 
             {/* Sidebar */}
+            {(contactInfo || sidebarNewsletter || sidebarSocial) ? (
             <div className="space-y-6">
               {contactInfo ? (
                 <Card className="border-border">
@@ -258,32 +268,40 @@ export default function Contact() {
                 </Card>
               ) : null}
 
-              {/* Newsletter */}
+              {sidebarNewsletter ? (
               <Card className="border-border bg-card shadow-sm">
                 <CardHeader className="pb-3">
                   <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">
                     Bülten
                   </p>
-                  <CardTitle className="text-lg">Haftalık içgörüler</CardTitle>
+                  <CardTitle className="text-lg">
+                    {sidebarNewsletter?.title || 'Haftalık içgörüler'}
+                  </CardTitle>
                   <CardDescription className="leading-relaxed">
-                    Araştırma notları ve yeni yayınlardan haberdar olun.
+                    {sidebarNewsletter?.subtitle ||
+                      'Araştırma notları ve yeni yayınlardan haberdar olun.'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <NewsletterSubscribeBlock sourceTitle="İletişim Bülteni" />
                 </CardContent>
               </Card>
+              ) : null}
 
-              {/* Social Links */}
+              {sidebarSocial ? (
               <Card className="border-border">
                 <CardHeader>
-                  <CardTitle className="text-lg">Sosyal Medya</CardTitle>
+                  <CardTitle className="text-lg">
+                    {sidebarSocial?.title || 'Sosyal Medya'}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <SocialLinks variant="card" />
                 </CardContent>
               </Card>
+              ) : null}
             </div>
+            ) : null}
           </div>
         </div>
       </section>

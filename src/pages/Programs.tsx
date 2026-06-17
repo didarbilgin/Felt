@@ -174,7 +174,7 @@ export default function Programs() {
                 'FELT Dönüşüm Paketleri ile okulunuzu geleceğe hazırlayın. Size özel çözümler için iletişime geçin.'}
             </p>
             <Button className="mt-6" size="lg" onClick={openCtaApply}>
-              {cta.content || 'Başvur'}
+              Başvur
             </Button>
           </div>
         </section>

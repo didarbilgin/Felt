@@ -97,6 +97,28 @@ export function SectionEditor(props: SectionEditorProps) {
     );
   }
 
+  if (variant === 'section-title-only') {
+    return (
+      <SectionCardShell
+        title={adminLabel}
+        section={section}
+        sectionIndex={sectionIndex}
+        onUpdateSection={onUpdateSection}
+        onSave={handleSave}
+        onSortOrderChange={onSortOrderChange}
+      >
+        <div>
+          <Label>Başlık</Label>
+          <Input
+            className="mt-1"
+            value={section.title || ''}
+            onChange={(e) => onUpdateSection(sectionIndex, 'title', e.target.value)}
+          />
+        </div>
+      </SectionCardShell>
+    );
+  }
+
   if (variant === 'text-block') {
     return (
       <SectionCardShell
@@ -124,7 +146,9 @@ export function SectionEditor(props: SectionEditorProps) {
             rows={2}
           />
         </div>
-        {section.content !== null && section.content !== undefined && (
+        {section.content !== null &&
+          section.content !== undefined &&
+          section.section_key !== 'newsletter' && (
           <div>
             <Label>Ek metin</Label>
             <Textarea
@@ -406,14 +430,6 @@ export function SectionEditor(props: SectionEditorProps) {
             rows={3}
           />
         </div>
-        <div>
-          <Label>Buton metni</Label>
-          <Input
-            className="mt-1"
-            value={section.content || ''}
-            onChange={(e) => onUpdateSection(sectionIndex, 'content', e.target.value)}
-          />
-        </div>
         {showBulletItems ? (
           <div className="space-y-3 border-t pt-4">
             <Label>Çağrı maddeleri</Label>
@@ -523,7 +539,7 @@ export function SectionEditor(props: SectionEditorProps) {
                 rows={2}
               />
             </div>
-            {Array.isArray(item.items) ? (
+            {Array.isArray(item.items) && section.section_key !== 'contributor-types' ? (
               <div>
                 <Label>Liste maddeleri (her satır bir madde)</Label>
                 <Textarea
@@ -545,7 +561,14 @@ export function SectionEditor(props: SectionEditorProps) {
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => onAddItem(sectionIndex, { title: '', content: '', items: [] })}
+          onClick={() =>
+            onAddItem(
+              sectionIndex,
+              section.section_key === 'contributor-types'
+                ? { title: '', content: '' }
+                : { title: '', content: '', items: [] }
+            )
+          }
         >
           <Plus className="mr-2 h-4 w-4" />
           Öğe Ekle

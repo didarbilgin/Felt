@@ -330,10 +330,17 @@ SECTIONS = [
         "section_type": "text",
         "title": "Bülten",
         "subtitle": "Haftalık içgörüler ve yeni yayınlardan haberdar olun",
-        "content": "E-posta adresinizi bırakın",
         "sort_order": 2,
     },
     # --- Contact ---
+    {
+        "page_key": "contact",
+        "section_key": "contact-form",
+        "section_type": "text",
+        "title": "Mesajınızı Paylaşın",
+        "subtitle": "Düşüncelerinizi, önerilerinizi veya sorularınızı bizimle paylaşabilirsiniz.",
+        "sort_order": 1,
+    },
     {
         "page_key": "contact",
         "section_key": "contact-info",
@@ -342,7 +349,22 @@ SECTIONS = [
             {"title": "E-posta", "content": "drhumeyrakalafat@gmail.com"},
             {"title": "Konum", "content": "İstanbul, Türkiye"},
         ],
-        "sort_order": 1,
+        "sort_order": 2,
+    },
+    {
+        "page_key": "contact",
+        "section_key": "contact-sidebar-newsletter",
+        "section_type": "text",
+        "title": "Haftalık içgörüler",
+        "subtitle": "Araştırma notları ve yeni yayınlardan haberdar olun.",
+        "sort_order": 3,
+    },
+    {
+        "page_key": "contact",
+        "section_key": "contact-sidebar-social",
+        "section_type": "text",
+        "title": "Sosyal Medya",
+        "sort_order": 4,
     },
     # --- Footer ---
     {
@@ -404,11 +426,40 @@ def seed_page_sections_if_empty(db: Session) -> str:
     return "created"
 
 
+def ensure_missing_page_sections(db: Session) -> str:
+    """Insert CMS sections that are defined in seed but missing from the database."""
+    added = 0
+    for section_data in SECTIONS:
+        exists = (
+            db.query(PageSection)
+            .filter(
+                PageSection.page_key == section_data["page_key"],
+                PageSection.section_key == section_data["section_key"],
+            )
+            .first()
+        )
+        if exists:
+            continue
+        db.add(PageSection(**_section_payload(section_data)))
+        added += 1
+
+    if added:
+        db.commit()
+        return f"added {added}"
+
+    return "skipped"
+
+
 def seed_cms_pages_if_empty(db: Session) -> dict[str, str]:
     """Seed pages and page sections when their tables are empty."""
     pages_result = seed_pages_if_empty(db)
     sections_result = seed_page_sections_if_empty(db)
-    return {"pages": pages_result, "page_sections": sections_result}
+    missing_sections_result = ensure_missing_page_sections(db)
+    return {
+        "pages": pages_result,
+        "page_sections": sections_result,
+        "missing_page_sections": missing_sections_result,
+    }
 
 
 if __name__ == "__main__":

@@ -49,6 +49,9 @@ export const SECTION_ADMIN_LABELS: Record<string, string> = {
   'research-circles': 'Araştırma Çevreleri',
   'blog-tabs': 'Blog Kategorileri',
   'contact-info': 'İletişim Bilgileri',
+  'contact-form': 'İletişim Formu',
+  'contact-sidebar-newsletter': 'Yan Panel — Bülten',
+  'contact-sidebar-social': 'Yan Panel — Sosyal Medya',
   brand: 'Marka Metni',
   copyright: 'Telif Metni',
 };
@@ -72,6 +75,7 @@ export type SectionEditorVariant =
   | 'ecosystem-items'
   | 'display-labels'
   | 'section-heading'
+  | 'section-title-only'
   | 'text-block'
   | 'default';
 
@@ -107,6 +111,13 @@ export function getSectionEditorVariant(section: PageSection): SectionEditorVari
     return 'display-labels';
   }
   if (key === 'highlight') return 'section-heading';
+  if (
+    key === 'contact-form' ||
+    key === 'contact-sidebar-newsletter'
+  ) {
+    return 'section-heading';
+  }
+  if (key === 'contact-sidebar-social') return 'section-title-only';
   if (key === 'highlights') return 'cards';
   if (key === 'lab-sections') return 'lab-cards';
   if (key === 'hubs' && page === 'home') return 'hubs-ecosystem';
@@ -128,8 +139,8 @@ export function shouldShowSectionInAdmin(section: PageSection): boolean {
   return !HIDDEN_ADMIN_SECTION_KEYS.has(section.section_key);
 }
 
-export function shouldShowSortOrder(_section: PageSection): boolean {
-  return true;
+export function shouldShowSortOrder(section: PageSection): boolean {
+  return section.page_key !== 'contact';
 }
 
 const SECTION_ACTIVE_TOGGLE_HIDDEN_KEYS = new Set([

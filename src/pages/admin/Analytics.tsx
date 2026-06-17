@@ -57,9 +57,7 @@ export default function AdminAnalytics() {
           </CardHeader>
           <CardContent className="space-y-1">
             <div className="text-3xl font-bold">{summary.total_visits}</div>
-            <p className="text-xs text-muted-foreground">
-              Siteye yapılan tüm oturum girişleri (sayfa geçişleri sayılmaz).
-            </p>
+            <p className="text-xs text-muted-foreground">Sitenin toplam ziyaret sayısı.</p>
           </CardContent>
         </Card>
 
@@ -72,9 +70,7 @@ export default function AdminAnalytics() {
           </CardHeader>
           <CardContent className="space-y-1">
             <div className="text-3xl font-bold">{summary.today_visits}</div>
-            <p className="text-xs text-muted-foreground">
-              Yalnızca bugün (Türkiye saati, 00:00–23:59); önceki günler dahil değildir.
-            </p>
+            <p className="text-xs text-muted-foreground">Bugünkü ziyaret sayısı.</p>
           </CardContent>
         </Card>
 
@@ -88,8 +84,7 @@ export default function AdminAnalytics() {
           <CardContent className="space-y-1">
             <div className="text-3xl font-bold">{summary.unique_visitors}</div>
             <p className="text-xs text-muted-foreground">
-              Tarayıcıda saklanan anonim kimliğe göre siteyi en az bir kez ziyaret eden kişi
-              sayısı.
+              Siteyi ziyaret eden farklı kişi sayısı.
             </p>
           </CardContent>
         </Card>
@@ -103,10 +98,7 @@ export default function AdminAnalytics() {
           </CardHeader>
           <CardContent className="space-y-1">
             <div className="text-3xl font-bold">{summary.returning_visitors}</div>
-            <p className="text-xs text-muted-foreground">
-              Aynı anonim kimlikle siteye birden fazla oturumda (farklı gün veya ziyaretlerde)
-              gelen ziyaretçi sayısı.
-            </p>
+            <p className="text-xs text-muted-foreground">Birden fazla kez gelen ziyaretçi sayısı.</p>
           </CardContent>
         </Card>
       </div>

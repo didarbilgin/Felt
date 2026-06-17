@@ -10,7 +10,6 @@ import {
   LogOut,
   Menu,
   Layout,
-  Mail,
   ClipboardList,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,6 @@ const sidebarItems = [
   { label: 'Etkinlikler', href: '/admin/events', icon: Calendar },
   { label: 'Blog', href: '/admin/blog', icon: PenTool },
   { label: 'Sayfaları Düzenle', href: '/admin/pages', icon: Layout },
-  { label: 'İletişim Mesajları', href: '/admin/contact-messages', icon: Mail },
   { label: 'Başvurular', href: '/admin/applications', icon: ClipboardList },
 ];
 

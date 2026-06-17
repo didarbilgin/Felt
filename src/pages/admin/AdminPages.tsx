@@ -293,7 +293,9 @@ export default function AdminPages() {
                 onPatchSectionItem={patchSectionItem}
                 onAddItem={addItem}
                 onRemoveItem={removeItem}
-                onSortOrderChange={handleSortOrderChange}
+                onSortOrderChange={
+                  selectedPageKey === 'contact' ? undefined : handleSortOrderChange
+                }
                 onSave={saveSection}
               />
             );

@@ -36,7 +36,7 @@ def _format_results(results: dict[str, Any]) -> list[str]:
     else:
         lines.append(f"admin_user: {admin_result}")
 
-    for key in ("about_sections", "pages", "page_sections"):
+    for key in ("about_sections", "pages", "page_sections", "missing_page_sections"):
         lines.append(f"{key}: {results.get(key, 'skipped')}")
 
     sample = results.get("sample_content", {})
